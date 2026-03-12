@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Space Game</title>
+    <title>Gravity Runner</title>
     <style>
         * {
             margin: 0;
@@ -16,7 +16,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(to bottom, #0a0a1a, #1a1a3a);
+            background: linear-gradient(to bottom, #0a0a2a, #1a1a4a);
             font-family: 'Arial', sans-serif;
             overflow: hidden;
         }
@@ -36,13 +36,12 @@
             box-shadow: 0 0 30px rgba(100, 100, 255, 0.3);
         }
 
-        /* UI 元素 */
         #score {
             position: absolute;
             top: 20px;
             left: 20px;
             color: #fff;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 10;
@@ -77,7 +76,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             border-radius: 10px;
             color: white;
             text-align: center;
@@ -93,7 +92,7 @@
 
         #startScreen p, #gameOverScreen p {
             font-size: 18px;
-            margin-bottom: 30px;
+            margin-bottom: 15px;
             color: #aaa;
         }
 
@@ -107,6 +106,7 @@
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 5px 15px rgba(74, 158, 255, 0.4);
+            margin: 10px;
         }
 
         .btn:hover {
@@ -124,7 +124,6 @@
             display: none !important;
         }
 
-        /* 名字输入样式 */
         #nameInputContainer {
             margin: 20px 0;
         }
@@ -151,7 +150,6 @@
             color: #888;
         }
 
-        /* 排行榜样式 */
         #leaderboard {
             margin-top: 20px;
             padding: 15px 30px;
@@ -215,7 +213,6 @@
             margin-left: 10px;
         }
 
-        /* 排行榜翻页 */
         .leaderboard-pagination {
             display: flex;
             justify-content: center;
@@ -248,20 +245,20 @@
             font-size: 14px;
         }
 
-        /* 滚动条样式 */
         #leaderboard::-webkit-scrollbar {
             width: 6px;
         }
+
         #leaderboard::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
         }
+
         #leaderboard::-webkit-scrollbar-thumb {
             background: rgba(255, 255, 255, 0.3);
             border-radius: 3px;
         }
 
-        /* 倒计时样式 */
         #countdown {
             position: absolute;
             top: 50%;
@@ -279,6 +276,19 @@
             50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .instructions p {
+            margin: 5px 0;
+            color: #88ff88 !important;
+        }
     </style>
 </head>
 <body>
@@ -289,9 +299,13 @@
         <div id="countdown" class="hidden"></div>
 
         <div id="startScreen">
-            <h1>🚀 SPACE GAME</h1>
-            <p data-zh="点击鼠标让飞行器上升，穿越洞穴！" data-en="Click to fly up and navigate through the cave!">Click to fly up and navigate through the cave!</p>
-            <p data-zh="不点击会自动下滑，不要碰到洞穴壁" data-en="Release to fall down. Don't hit the cave walls!">Release to fall down. Don't hit the cave walls!</p>
+            <h1>🏃 GRAVITY RUNNER</h1>
+            <div class="instructions">
+                <p data-zh="🎮 玩法说明:" data-en="🎮 How to Play:">🎮 How to Play:</p>
+                <p data-zh="• 玩家在地板上奔跑，点击屏幕翻转重力到天花板" data-en="• Player runs on the floor. Click to flip gravity to the ceiling!">• Player runs on the floor. Click to flip gravity to the ceiling!</p>
+                <p data-zh="• 躲避地板和天花板上的尖刺障碍物" data-en="• Avoid the spike obstacles on both floor and ceiling!">• Avoid the spike obstacles on both floor and ceiling!</p>
+                <p data-zh="• 再点击一次回到地板" data-en="• Click again to return to the floor!">• Click again to return to the floor!</p>
+            </div>
 
             <div id="nameInputContainer">
                 <input type="text" id="playerName" maxlength="10" placeholder="Enter your name" data-zh-placeholder="输入你的名字">
@@ -332,25 +346,22 @@
         const highScoreMessage = document.getElementById('highScoreMessage');
         const countdownElement = document.getElementById('countdown');
 
-        // 游戏状态
+        // Game state
         let gameRunning = false;
         let score = 0;
         let animationId;
 
-        // 排行榜管理
+        // Leaderboard
         let currentPlayerName = '';
         let isNewHighScore = false;
         let cachedLeaderboard = [];
         let cachedHighScores = {};
-
-        // 排行榜翻页
         let currentPage = 1;
         const itemsPerPage = 10;
 
-        // API 基础路径
         const API_BASE = '/api';
 
-        // 获取排行榜数据（从服务器）
+        // ============ LEADERBOARD FUNCTIONS ============
         async function getLeaderboard() {
             try {
                 const response = await fetch(`${API_BASE}/leaderboard`);
@@ -363,14 +374,11 @@
             }
         }
 
-        // 更新排行榜（到服务器）
         async function updateLeaderboard(name, score) {
             try {
                 const response = await fetch(`${API_BASE}/leaderboard`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ name, score })
                 });
                 const result = await response.json();
@@ -384,31 +392,25 @@
             return cachedLeaderboard;
         }
 
-        // 获取玩家的最高分
         async function getPlayerHighScore(name) {
-            // 先检查缓存
             if (cachedHighScores[name] !== undefined) {
                 return cachedHighScores[name];
             }
-
             try {
                 const response = await fetch(`${API_BASE}/highscore/${encodeURIComponent(name)}`);
                 const data = await response.json();
                 cachedHighScores[name] = data.score;
                 return data.score;
             } catch (error) {
-                console.error('Error getting high score:', error);
                 return 0;
             }
         }
 
-        // 检查是否是新纪录
         async function checkHighScore(name, score) {
             const highScore = await getPlayerHighScore(name);
             return score > highScore;
         }
 
-        // 渲染排行榜
         async function renderLeaderboard() {
             const leaderboard = await getLeaderboard();
 
@@ -418,7 +420,6 @@
                 return;
             }
 
-            // 计算分页
             const totalPages = Math.ceil(leaderboard.length / itemsPerPage);
             const startIndex = (currentPage - 1) * itemsPerPage;
             const endIndex = Math.min(startIndex + itemsPerPage, leaderboard.length);
@@ -441,7 +442,6 @@
             updatePagination(totalPages);
         }
 
-        // 更新翻页按钮
         function updatePagination(totalPages) {
             const pageInfo = document.getElementById('pageInfo');
             const prevBtn = document.getElementById('prevPageBtn');
@@ -458,7 +458,6 @@
             }
         }
 
-        // 上一页
         function prevPage() {
             if (currentPage > 1) {
                 currentPage--;
@@ -466,7 +465,6 @@
             }
         }
 
-        // 下一页
         function nextPage() {
             const totalPages = Math.ceil(cachedLeaderboard.length / itemsPerPage);
             if (currentPage < totalPages) {
@@ -475,36 +473,20 @@
             }
         }
 
-        // 语言设置
-        let currentLang = 'en'; // 'en' or 'zh'
+        // ============ LANGUAGE ============
+        let currentLang = 'en';
         const texts = {
             en: {
                 score: 'Score',
                 finalScore: 'Score',
                 newRecord: '🎉 New Personal Record!',
-                yourBest: 'Your Best: ',
-                novice: 'Novice',
-                easy: 'Easy',
-                normal: 'Normal',
-                hard: 'Hard',
-                expert: 'Expert',
-                master: 'Master',
-                legend: 'Legend',
-                champion: 'Champion'
+                yourBest: 'Your Best: '
             },
             zh: {
                 score: '分数',
                 finalScore: '分数',
                 newRecord: '🎉 新个人纪录！',
-                yourBest: '你的最高分: ',
-                novice: '新手',
-                easy: '简单',
-                normal: '普通',
-                hard: '困难',
-                expert: '专家',
-                master: '大师',
-                legend: '传奇',
-                champion: '冠军'
+                yourBest: '你的最高分: '
             }
         };
 
@@ -512,18 +494,14 @@
             currentLang = currentLang === 'en' ? 'zh' : 'en';
             langBtn.textContent = currentLang === 'en' ? '中文' : 'English';
 
-            // 更新所有带 data-zh 和 data-en 的元素
             document.querySelectorAll('[data-zh]').forEach(el => {
                 el.textContent = el.getAttribute(`data-${currentLang}`);
             });
 
-            // 更新 placeholder
             const nameInput = document.getElementById('playerName');
             nameInput.placeholder = currentLang === 'en' ? 'Enter your name' : '输入你的名字';
 
-            // 更新分数显示
             updateScoreDisplay();
-            // 重新渲染排行榜（更新标题）
             renderLeaderboard();
         }
 
@@ -533,7 +511,6 @@
             finalScoreElement.textContent = `${texts[currentLang].finalScore}: ${score}`;
         }
 
-        // 倒计时开始游戏
         async function startCountdown() {
             countdownElement.classList.remove('hidden');
             startScreen.classList.add('hidden');
@@ -543,64 +520,59 @@
 
             for (let i = 0; i < countdowns.length; i++) {
                 countdownElement.textContent = countdowns[i];
-                // 重置动画
                 countdownElement.style.animation = 'none';
-                countdownElement.offsetHeight; // 触发重排
+                countdownElement.offsetHeight;
                 countdownElement.style.animation = 'pulse 0.5s ease-in-out';
-
                 await new Promise(resolve => setTimeout(resolve, 800));
             }
 
             countdownElement.classList.add('hidden');
         }
 
-        // 玩家对象
-        const player = {
-            x: 100,
-            y: 250,
-            width: 35,
-            height: 25,
-            velocityY: 0,
-            gravity: 0.08,      // 重力加速度（很慢）
-            jumpForce: -4,      // 跳跃力度（上升更明显）
-            maxVelocity: 5,     // 最大速度
-            color: '#00ffff'
+        // ============ GAME VARIABLES ============
+        const GROUND_Y = 500;  // Floor position
+        const CEILING_Y = 75;  // Ceiling position (player feet when upside down)
+        const PLAYER_SIZE = 40;
+
+        let player = {
+            x: 150,
+            y: GROUND_Y,
+            onFloor: true,      // true = on floor, false = on ceiling
+            flipping: false,    // currently flipping gravity
+            flipProgress: 0,    // 0 to 1
+            runFrame: 0         // running animation frame
         };
 
-        // 障碍物数组
         let obstacles = [];
-        let obstacleSpeed = 1;
+        let obstacleSpeed = 4;
         let obstacleSpawnTimer = 0;
-        let obstacleSpawnInterval = 150;
+        let obstacleSpawnInterval = 100;
 
-        // 难度参数（基于分数连续平滑变化）
-        function getDifficultyParams() {
-            // 分数越高，速度越快，通道越窄
-            // 速度: 从1.0开始，每100分增加0.1，最高2.0
-            const speed = Math.min(2.0, 1.0 + score / 1000);
-
-            // 通道宽度: 从320px开始，每100分减少5px，最低200px
-            const gap = Math.max(200, 320 - score / 20);
-
-            return { speed, gap };
-        }
-
-        // 星星背景
+        // Background stars
         let stars = [];
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 80; i++) {
             stars.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                size: Math.random() * 2 + 1,
-                speed: Math.random() * 2 + 1
+                size: Math.random() * 2 + 0.5,
+                speed: Math.random() * 1.5 + 0.5
             });
         }
 
-        // 绘制星星背景
-        function drawStars() {
+        // ============ DRAWING FUNCTIONS ============
+        function drawBackground() {
+            // Sky gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            gradient.addColorStop(0, '#0a0520');
+            gradient.addColorStop(0.5, '#150a30');
+            gradient.addColorStop(1, '#0a0520');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Stars
             ctx.fillStyle = '#ffffff';
             stars.forEach(star => {
-                ctx.globalAlpha = Math.random() * 0.5 + 0.5;
+                ctx.globalAlpha = Math.random() * 0.4 + 0.3;
                 ctx.beginPath();
                 ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
                 ctx.fill();
@@ -608,7 +580,6 @@
             ctx.globalAlpha = 1;
         }
 
-        // 更新星星位置
         function updateStars() {
             stars.forEach(star => {
                 star.x -= star.speed;
@@ -619,406 +590,195 @@
             });
         }
 
-        // 绘制玩家（飞行器）
-        function drawPlayer() {
-            const x = player.x;
-            const y = player.y;
+        function drawFloor() {
+            // Floor
+            const floorGradient = ctx.createLinearGradient(0, GROUND_Y + PLAYER_SIZE, 0, canvas.height);
+            floorGradient.addColorStop(0, '#3a3a5a');
+            floorGradient.addColorStop(1, '#2a2a4a');
+            ctx.fillStyle = floorGradient;
+            ctx.fillRect(0, GROUND_Y + PLAYER_SIZE, canvas.width, canvas.height - GROUND_Y - PLAYER_SIZE);
 
-            // 发光效果
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = player.color;
-
-            // 飞行器主体 - 椭圆形
-            ctx.fillStyle = player.color;
-            ctx.beginPath();
-            ctx.ellipse(x + player.width/2, y + player.height/2, player.width/2, player.height/2, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 驾驶舱
-            ctx.fillStyle = '#003366';
-            ctx.beginPath();
-            ctx.ellipse(x + player.width/2 + 8, y + player.height/2 - 2, 8, 6, 0, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 驾驶舱反光
-            ctx.fillStyle = '#00ffff';
-            ctx.beginPath();
-            ctx.ellipse(x + player.width/2 + 10, y + player.height/2 - 3, 3, 2, -0.3, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 推进器火焰 - 上升时显示
-            if (player.velocityY < -0.5) {
-                ctx.shadowColor = '#ff6600';
-                const flameLength = Math.abs(player.velocityY) * 3 + 10;
-                ctx.fillStyle = '#ff6600';
-                ctx.beginPath();
-                ctx.moveTo(x - 2, y + player.height/2 + 3);
-                ctx.lineTo(x - flameLength, y + player.height/2);
-                ctx.lineTo(x - 2, y + player.height/2 - 3);
-                ctx.fill();
-
-                ctx.fillStyle = '#ffff00';
-                ctx.beginPath();
-                ctx.moveTo(x - 2, y + player.height/2 + 2);
-                ctx.lineTo(x - flameLength * 0.5, y + player.height/2);
-                ctx.lineTo(x - 2, y + player.height/2 - 2);
-                ctx.fill();
-            }
-
-            ctx.shadowBlur = 0;
-        }
-
-        // 更新玩家位置
-        function updatePlayer() {
-            // 应用重力
-            player.velocityY += player.gravity;
-
-            // 限制最大速度（上升和下降对称）
-            if (player.velocityY > player.maxVelocity) {
-                player.velocityY = player.maxVelocity;
-            }
-            if (player.velocityY < -player.maxVelocity) {
-                player.velocityY = -player.maxVelocity;
-            }
-
-            player.y += player.velocityY;
-
-            // 边界检测（碰到上下边界游戏结束）
-            if (player.y < 0 || player.y + player.height > canvas.height) {
-                gameOver();
-            }
-        }
-
-        // 绘制上下边界的岩石尖刺
-        function drawBoundarySpikes() {
-            const spikeWidth = 40;
-            const spikeHeight = 25;
-            const numSpikes = Math.ceil(canvas.width / spikeWidth);
-
-            ctx.fillStyle = '#4a3728';
-            ctx.strokeStyle = '#ff4444';
-            ctx.lineWidth = 2;
-
-            // 上方尖刺
-            for (let i = 0; i < numSpikes; i++) {
-                const x = i * spikeWidth;
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x + spikeWidth / 2, spikeHeight);
-                ctx.lineTo(x + spikeWidth, 0);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-            }
-
-            // 下方尖刺
-            for (let i = 0; i < numSpikes; i++) {
-                const x = i * spikeWidth;
-                ctx.beginPath();
-                ctx.moveTo(x, canvas.height);
-                ctx.lineTo(x + spikeWidth / 2, canvas.height - spikeHeight);
-                ctx.lineTo(x + spikeWidth, canvas.height);
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
-            }
-
-            // 发光警告效果
-            ctx.shadowColor = '#ff0000';
-            ctx.shadowBlur = 10;
-            ctx.strokeStyle = '#ff4444';
+            // Floor line
+            ctx.strokeStyle = '#6a6aaa';
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(0, spikeHeight);
-            ctx.lineTo(canvas.width, spikeHeight);
+            ctx.moveTo(0, GROUND_Y + PLAYER_SIZE);
+            ctx.lineTo(canvas.width, GROUND_Y + PLAYER_SIZE);
             ctx.stroke();
 
+            // Floor pattern
+            ctx.fillStyle = '#4a4a7a';
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.fillRect(i, GROUND_Y + PLAYER_SIZE + 10, 30, 5);
+            }
+        }
+
+        function drawCeiling() {
+            // Ceiling
+            const ceilGradient = ctx.createLinearGradient(0, 0, 0, CEILING_Y);
+            ceilGradient.addColorStop(0, '#2a2a4a');
+            ceilGradient.addColorStop(1, '#3a3a5a');
+            ctx.fillStyle = ceilGradient;
+            ctx.fillRect(0, 0, canvas.width, CEILING_Y);
+
+            // Ceiling line
+            ctx.strokeStyle = '#6a6aaa';
+            ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(0, canvas.height - spikeHeight);
-            ctx.lineTo(canvas.width, canvas.height - spikeHeight);
+            ctx.moveTo(0, CEILING_Y);
+            ctx.lineTo(canvas.width, CEILING_Y);
             ctx.stroke();
+
+            // Ceiling pattern
+            ctx.fillStyle = '#4a4a7a';
+            for (let i = 0; i < canvas.width; i += 50) {
+                ctx.fillRect(i, CEILING_Y - 15, 30, 5);
+            }
+        }
+
+        function drawPlayer() {
+            ctx.save();
+
+            // Calculate position and rotation
+            let drawX = player.x;
+            let drawY = player.y;
+            let rotation = 0;
+
+            if (player.flipping) {
+                // During flip, interpolate position and rotation
+                const startY = player.onFloor ? GROUND_Y : CEILING_Y;
+                const endY = player.onFloor ? CEILING_Y : GROUND_Y;
+                drawY = startY + (endY - startY) * player.flipProgress;
+                rotation = player.onFloor ? player.flipProgress * Math.PI : Math.PI + player.flipProgress * Math.PI;
+            } else {
+                rotation = player.onFloor ? 0 : Math.PI;
+            }
+
+            ctx.translate(drawX + PLAYER_SIZE / 2, drawY + PLAYER_SIZE / 2);
+            ctx.rotate(rotation);
+
+            // Running animation (leg movement)
+            const legOffset = Math.sin(player.runFrame * 0.3) * 5;
+
+            // Body
+            ctx.fillStyle = '#00ffff';
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 15;
+            ctx.fillRect(-PLAYER_SIZE/2 + 5, -PLAYER_SIZE/2 + 5, PLAYER_SIZE - 10, PLAYER_SIZE - 15);
+
+            // Head
+            ctx.beginPath();
+            ctx.arc(0, -PLAYER_SIZE/2 + 8, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Eye
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(5, -PLAYER_SIZE/2 + 6, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(6, -PLAYER_SIZE/2 + 5, 1, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#00ffff';
+
+            // Legs
+            ctx.fillRect(-8, PLAYER_SIZE/2 - 12 + legOffset, 6, 15);
+            ctx.fillRect(2, PLAYER_SIZE/2 - 12 - legOffset, 6, 15);
+
+            // Arms
+            ctx.fillRect(-PLAYER_SIZE/2 - 2, -5 + legOffset * 0.5, 6, 12);
+            ctx.fillRect(PLAYER_SIZE/2 - 4, -5 - legOffset * 0.5, 6, 12);
+
+            ctx.shadowBlur = 0;
+            ctx.restore();
+        }
+
+        function drawSpike(x, y, width, height, pointingUp) {
+            const numSpikes = Math.floor(width / 25);
+
+            ctx.fillStyle = '#ff4444';
+            ctx.strokeStyle = '#ff0000';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#ff0000';
+            ctx.shadowBlur = 10;
+
+            for (let i = 0; i < numSpikes; i++) {
+                const spikeX = x + i * 25;
+                ctx.beginPath();
+                if (pointingUp) {
+                    ctx.moveTo(spikeX, y + height);
+                    ctx.lineTo(spikeX + 12, y);
+                    ctx.lineTo(spikeX + 25, y + height);
+                } else {
+                    ctx.moveTo(spikeX, y);
+                    ctx.lineTo(spikeX + 12, y + height);
+                    ctx.lineTo(spikeX + 25, y);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
             ctx.shadowBlur = 0;
         }
 
-        // 玩家跳跃（点击时）- 增加向上的速度而不是直接设置
-        function playerJump() {
-            if (gameRunning) {
-                // 增加向上速度（累加而不是替换，产生惯性效果）
-                player.velocityY += player.jumpForce;
-            }
-        }
-
-        // 生成障碍物
-        function spawnObstacle() {
-            const params = getDifficultyParams();
-
-            // 根据分数决定障碍物类型
-            // 0-300分: 只用单个障碍物
-            // 300-600分: 80%单个, 20%柱子对
-            // 600-1000分: 60%单个, 30%柱子对, 10%移动
-            // 1000分+: 50%单个, 30%柱子对, 20%移动
-            let type;
-            const r = Math.random();
-            if (score < 300) {
-                type = 'single';
-            } else if (score < 600) {
-                type = r < 0.8 ? 'single' : 'short';
-            } else if (score < 1000) {
-                type = r < 0.6 ? 'single' : r < 0.9 ? 'short' : 'moving';
-            } else {
-                type = r < 0.5 ? 'single' : r < 0.8 ? 'short' : 'moving';
-            }
-
-            const baseY = canvas.height / 2;
-            let obstacle = {
-                x: canvas.width,
-                type: type,
-                passed: false
-            };
-
-            switch(type) {
-                case 'single':
-                    // 单个短障碍物（上下随机）
-                    obstacle.y = Math.random() < 0.5 ?
-                        Math.random() * 80 + 30 : // 上方
-                        canvas.height - Math.random() * 80 - 50; // 下方
-                    obstacle.width = 30;
-                    obstacle.height = 40 + Math.random() * 20;
-                    obstacle.isTop = obstacle.y < canvas.height / 2;
-                    obstacle.color = '#8B4513';
-                    break;
-
-                case 'short':
-                    // 短柱子对（上下都有，但中间通道宽）
-                    obstacle.y = baseY;
-                    obstacle.gap = params.gap;
-                    obstacle.width = 40;
-                    obstacle.color = '#A0522D';
-                    break;
-
-                case 'moving':
-                    // 移动障碍物
-                    obstacle.y = Math.random() * (canvas.height - 150) + 75;
-                    obstacle.width = 35;
-                    obstacle.height = 50;
-                    obstacle.moveY = (Math.random() < 0.5 ? 1 : -1) * (1.5 + Math.random());
-                    obstacle.isFloating = true;
-                    obstacle.color = '#CD853F';
-                    break;
-            }
-
-            obstacles.push(obstacle);
-        }
-
-        // 绘制障碍物
         function drawObstacles() {
             obstacles.forEach(obs => {
-                ctx.save();
-
-                switch(obs.type) {
-                    case 'single':
-                        drawSingleObstacle(obs);
-                        break;
-                    case 'short':
-                        drawPairObstacle(obs);
-                        break;
-                    case 'moving':
-                        drawMovingObstacle(obs);
-                        break;
+                if (obs.onFloor) {
+                    // Spike on floor
+                    drawSpike(obs.x, GROUND_Y + PLAYER_SIZE - obs.height, obs.width, obs.height, true);
+                } else {
+                    // Spike on ceiling
+                    drawSpike(obs.x, CEILING_Y, obs.width, obs.height, false);
                 }
-
-                ctx.restore();
             });
         }
 
-        // 绘制单个障碍物
-        function drawSingleObstacle(obs) {
-            const gradient = ctx.createLinearGradient(obs.x, 0, obs.x + obs.width, 0);
-            gradient.addColorStop(0, '#654321');
-            gradient.addColorStop(0.5, obs.color);
-            gradient.addColorStop(1, '#654321');
-
-            ctx.fillStyle = gradient;
-
-            // 主体
-            ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-
-            // 岩石纹理
-            ctx.fillStyle = '#4a3728';
-            for (let i = 0; i < 3; i++) {
-                const rx = obs.x + 5 + Math.random() * (obs.width - 10);
-                const ry = obs.y + 5 + Math.random() * (obs.height - 10);
-                ctx.beginPath();
-                ctx.arc(rx, ry, 3 + Math.random() * 4, 0, Math.PI * 2);
-                ctx.fill();
+        // ============ GAME LOGIC ============
+        function flipGravity() {
+            if (!player.flipping && gameRunning) {
+                player.flipping = true;
+                player.flipProgress = 0;
             }
-
-            // 边缘发光
-            ctx.strokeStyle = '#ff6644';
-            ctx.lineWidth = 2;
-            ctx.shadowColor = '#ff4444';
-            ctx.shadowBlur = 8;
-            ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
-            ctx.shadowBlur = 0;
         }
 
-        // 绘制对障碍物（上下都有）
-        function drawPairObstacle(obs) {
-            const gapTop = obs.y - obs.gap / 2;
-            const gapBottom = obs.y + obs.gap / 2;
+        function updatePlayer() {
+            // Running animation
+            player.runFrame++;
 
-            const gradient = ctx.createLinearGradient(obs.x, 0, obs.x + obs.width, 0);
-            gradient.addColorStop(0, '#654321');
-            gradient.addColorStop(0.5, obs.color);
-            gradient.addColorStop(1, '#654321');
-
-            ctx.fillStyle = gradient;
-
-            // 上方柱子
-            if (gapTop > 0) {
-                ctx.fillRect(obs.x, 0, obs.width, gapTop);
-
-                // 锯齿边缘
-                ctx.fillStyle = '#4a3728';
-                for (let i = 0; i < obs.width; i += 12) {
-                    ctx.beginPath();
-                    ctx.moveTo(obs.x + i, gapTop);
-                    ctx.lineTo(obs.x + i + 6, gapTop - 8);
-                    ctx.lineTo(obs.x + i + 12, gapTop);
-                    ctx.fill();
-                }
-                ctx.fillStyle = gradient;
-            }
-
-            // 下方柱子
-            if (gapBottom < canvas.height) {
-                ctx.fillRect(obs.x, gapBottom, obs.width, canvas.height - gapBottom);
-
-                // 锯齿边缘
-                ctx.fillStyle = '#4a3728';
-                for (let i = 0; i < obs.width; i += 12) {
-                    ctx.beginPath();
-                    ctx.moveTo(obs.x + i, gapBottom);
-                    ctx.lineTo(obs.x + i + 6, gapBottom + 8);
-                    ctx.lineTo(obs.x + i + 12, gapBottom);
-                    ctx.fill();
+            // Handle flipping
+            if (player.flipping) {
+                player.flipProgress += 0.08;
+                if (player.flipProgress >= 1) {
+                    player.flipProgress = 0;
+                    player.flipping = false;
+                    player.onFloor = !player.onFloor;
+                    player.y = player.onFloor ? GROUND_Y : CEILING_Y;
                 }
             }
-
-            // 危险发光边缘
-            ctx.strokeStyle = obs.type === 'narrow' ? '#ff0000' : '#ff6644';
-            ctx.lineWidth = obs.type === 'narrow' ? 3 : 2;
-            ctx.shadowColor = obs.type === 'narrow' ? '#ff0000' : '#ff4444';
-            ctx.shadowBlur = obs.type === 'narrow' ? 20 : 10;
-
-            if (gapTop > 0) {
-                ctx.beginPath();
-                ctx.moveTo(obs.x, gapTop);
-                ctx.lineTo(obs.x + obs.width, gapTop);
-                ctx.stroke();
-            }
-            if (gapBottom < canvas.height) {
-                ctx.beginPath();
-                ctx.moveTo(obs.x, gapBottom);
-                ctx.lineTo(obs.x + obs.width, gapBottom);
-                ctx.stroke();
-            }
-            ctx.shadowBlur = 0;
         }
 
-        // 绘制移动障碍物
-        function drawMovingObstacle(obs) {
-            const gradient = ctx.createRadialGradient(
-                obs.x + obs.width/2, obs.y + obs.height/2, 0,
-                obs.x + obs.width/2, obs.y + obs.height/2, obs.width
-            );
-            gradient.addColorStop(0, '#DEB887');
-            gradient.addColorStop(1, obs.color);
+        function spawnObstacle() {
+            const minWidth = 50;
+            const maxWidth = 150;
+            const minSpikeHeight = 30;
+            const maxSpikeHeight = 50;
 
-            ctx.fillStyle = gradient;
+            // Randomly choose floor or ceiling
+            const onFloor = Math.random() < 0.5;
 
-            // 圆形石头
-            ctx.beginPath();
-            ctx.arc(obs.x + obs.width/2, obs.y + obs.height/2, obs.width/2, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 纹理
-            ctx.fillStyle = '#8B4513';
-            ctx.beginPath();
-            ctx.arc(obs.x + obs.width/2 - 5, obs.y + obs.height/2 - 5, 4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(obs.x + obs.width/2 + 3, obs.y + obs.height/2 + 3, 3, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 发光边缘
-            ctx.strokeStyle = '#ffaa00';
-            ctx.lineWidth = 2;
-            ctx.shadowColor = '#ff6600';
-            ctx.shadowBlur = 12;
-            ctx.stroke();
-            ctx.shadowBlur = 0;
+            obstacles.push({
+                x: canvas.width,
+                y: onFloor ? GROUND_Y + PLAYER_SIZE : CEILING_Y,
+                width: minWidth + Math.random() * (maxWidth - minWidth),
+                height: minSpikeHeight + Math.random() * (maxSpikeHeight - minSpikeHeight),
+                onFloor: onFloor,
+                passed: false
+            });
         }
 
-        // 绘制锯齿障碍物
-        function drawZigzagObstacle(obs) {
-            const gapTop = obs.y - obs.gap / 2;
-            const gapBottom = obs.y + obs.gap / 2;
-
-            ctx.fillStyle = obs.color;
-
-            // 上方锯齿
-            if (gapTop > 0) {
-                ctx.beginPath();
-                ctx.moveTo(obs.x, 0);
-                for (let y = 0; y < gapTop - 15; y += 15) {
-                    ctx.lineTo(obs.x + obs.width/2, y + 7);
-                    ctx.lineTo(obs.x, y + 15);
-                }
-                ctx.lineTo(obs.x, gapTop);
-                ctx.lineTo(obs.x + obs.width, gapTop);
-                ctx.lineTo(obs.x + obs.width, 0);
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            // 下方锯齿
-            if (gapBottom < canvas.height) {
-                ctx.beginPath();
-                ctx.moveTo(obs.x, canvas.height);
-                for (let y = canvas.height; y > gapBottom + 15; y -= 15) {
-                    ctx.lineTo(obs.x + obs.width/2, y - 7);
-                    ctx.lineTo(obs.x, y - 15);
-                }
-                ctx.lineTo(obs.x, gapBottom);
-                ctx.lineTo(obs.x + obs.width, gapBottom);
-                ctx.lineTo(obs.x + obs.width, canvas.height);
-                ctx.closePath();
-                ctx.fill();
-            }
-
-            // 边缘
-            ctx.strokeStyle = '#ff4444';
-            ctx.lineWidth = 2;
-            ctx.shadowColor = '#ff0000';
-            ctx.shadowBlur = 10;
-
-            if (gapTop > 0) {
-                ctx.beginPath();
-                ctx.moveTo(obs.x, gapTop);
-                ctx.lineTo(obs.x + obs.width, gapTop);
-                ctx.stroke();
-            }
-            if (gapBottom < canvas.height) {
-                ctx.beginPath();
-                ctx.moveTo(obs.x, gapBottom);
-                ctx.lineTo(obs.x + obs.width, gapBottom);
-                ctx.stroke();
-            }
-            ctx.shadowBlur = 0;
-        }
-
-        // 更新障碍物
         function updateObstacles() {
             obstacleSpawnTimer++;
             if (obstacleSpawnTimer >= obstacleSpawnInterval) {
@@ -1026,128 +786,69 @@
                 obstacleSpawnTimer = 0;
             }
 
-            // 获取平滑的难度参数
-            const params = getDifficultyParams();
-            obstacleSpeed = params.speed;
-
             obstacles.forEach((obs, index) => {
                 obs.x -= obstacleSpeed;
 
-                // 移动障碍物的垂直运动
-                if (obs.isFloating) {
-                    obs.y += obs.moveY;
-                    if (obs.y < 30 || obs.y + obs.height > canvas.height - 30) {
-                        obs.moveY *= -1;
-                    }
-                }
-
-                // 移除屏幕外的障碍物
+                // Remove when off screen
                 if (obs.x + obs.width < 0) {
                     obstacles.splice(index, 1);
                     score += 10;
                     updateScoreDisplay();
                 }
             });
+
+            // Gradually increase speed
+            if (score > 0 && score % 100 === 0) {
+                obstacleSpeed = Math.min(8, 4 + score / 500);
+            }
         }
 
-        // 碰撞检测
         function checkCollision() {
+            const playerLeft = player.x + 5;
+            const playerRight = player.x + PLAYER_SIZE - 5;
+            const playerFeetY = player.onFloor || (player.flipping && player.flipProgress < 0.5) ?
+                GROUND_Y + PLAYER_SIZE : CEILING_Y;
+
             for (let obs of obstacles) {
-                const playerRight = player.x + player.width;
-                const playerLeft = player.x;
-                const playerTop = player.y;
-                const playerBottom = player.y + player.height;
-                const playerCenterY = player.y + player.height / 2;
-
-                const obsRight = obs.x + obs.width;
-                const obsLeft = obs.x;
-
-                // 水平方向检测
-                if (playerRight > obsLeft && playerLeft < obsRight) {
-                    switch(obs.type) {
-                        case 'single':
-                            // 单个障碍物 - 矩形碰撞
-                            if (playerRight > obs.x && playerLeft < obs.x + obs.width &&
-                                playerBottom > obs.y && playerTop < obs.y + obs.height) {
-                                return true;
-                            }
-                            break;
-
-                        case 'short':
-                            // 对障碍物 - 检查是否在通道外
-                            const gapTop = obs.y - obs.gap / 2;
-                            const gapBottom = obs.y + obs.gap / 2;
-                            if (playerCenterY < gapTop || playerCenterY > gapBottom) {
-                                return true;
-                            }
-                            break;
-
-                        case 'moving':
-                            // 移动障碍物 - 圆形碰撞
-                            const dx = (player.x + player.width/2) - (obs.x + obs.width/2);
-                            const dy = (player.y + player.height/2) - (obs.y + obs.height/2);
-                            const distance = Math.sqrt(dx*dx + dy*dy);
-                            if (distance < player.width/2 + obs.width/2 - 5) {
-                                return true;
-                            }
-                            break;
+                // Horizontal overlap
+                if (playerRight > obs.x && playerLeft < obs.x + obs.width) {
+                    // Check if player is on the same surface as the spike
+                    if (obs.onFloor) {
+                        // Spike is on floor - player dies if on floor
+                        if (player.onFloor || (player.flipping && player.flipProgress < 0.5)) {
+                            return true;
+                        }
+                    } else {
+                        // Spike is on ceiling - player dies if on ceiling
+                        if (!player.onFloor || (player.flipping && player.flipProgress >= 0.5)) {
+                            return true;
+                        }
                     }
                 }
             }
             return false;
         }
 
-        // 绘制背景
-        function drawBackground() {
-            // 洞穴内部渐变背景
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#1a0a0a');
-            gradient.addColorStop(0.3, '#2a1a1a');
-            gradient.addColorStop(0.5, '#1a1510');
-            gradient.addColorStop(0.7, '#2a1a1a');
-            gradient.addColorStop(1, '#1a0a0a');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // 绘制洞壁纹理（上下边缘）
-            ctx.fillStyle = '#0a0505';
-            // 上方洞壁
-            ctx.fillRect(0, 0, canvas.width, 15);
-            // 下方洞壁
-            ctx.fillRect(0, canvas.height - 15, canvas.width, 15);
-
-            updateStars();
-            drawStars();
-        }
-
-        // 游戏主循环
         function gameLoop() {
             if (!gameRunning) return;
 
-            // 清空画布
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 绘制背景
             drawBackground();
-
-            // 绘制边界尖刺
-            drawBoundarySpikes();
-
-            // 更新和绘制玩家
+            drawCeiling();
+            drawFloor();
+            updateStars();
+            drawObstacles();
+            updateObstacles();
             updatePlayer();
             drawPlayer();
 
-            // 更新和绘制障碍物
-            updateObstacles();
-            drawObstacles();
-
-            // 碰撞检测
             if (checkCollision()) {
                 gameOver();
                 return;
             }
 
-            // 分数随时间增加
+            // Score increases with time
             score++;
             if (score % 10 === 0) {
                 updateScoreDisplay();
@@ -1156,49 +857,43 @@
             animationId = requestAnimationFrame(gameLoop);
         }
 
-        // 开始游戏
+        // ============ GAME STATE FUNCTIONS ============
         async function startGame() {
-            // 获取玩家名字
             const name = playerNameInput.value.trim() || 'Player';
             currentPlayerName = name;
 
-            // 倒计时
             await startCountdown();
 
-            // 重置游戏状态
-            player.y = 250;
-            player.velocityY = 0;
+            // Reset game
+            player.x = 150;
+            player.y = GROUND_Y;
+            player.onFloor = true;
+            player.flipping = false;
+            player.flipProgress = 0;
+            player.runFrame = 0;
+
             obstacles = [];
             score = 0;
+            obstacleSpeed = 4;
             obstacleSpawnTimer = 0;
-            obstacleSpawnInterval = 150;
-            obstacleSpeed = 1;
-            difficultyLevel = 1;
             updateScoreDisplay();
 
             gameRunning = true;
             gameLoop();
         }
 
-        // 游戏结束
         async function gameOver() {
             gameRunning = false;
             cancelAnimationFrame(animationId);
 
-            // 先获取当前最高分来比较
             const currentHighScore = await getPlayerHighScore(currentPlayerName);
             isNewHighScore = score > currentHighScore;
 
-            // 更新排行榜
             await updateLeaderboard(currentPlayerName, score);
-
-            // 清除缓存，确保下次获取最新数据
             cachedHighScores[currentPlayerName] = score;
 
-            // 显示最终分数
             finalScoreElement.textContent = `${texts[currentLang].finalScore}: ${score}`;
 
-            // 显示新纪录消息
             if (isNewHighScore && score > 0) {
                 highScoreMessage.innerHTML = `<span class="highscore-badge">${texts[currentLang].newRecord}</span>`;
             } else {
@@ -1208,50 +903,45 @@
             gameOverScreen.classList.remove('hidden');
         }
 
-        // 重新开始
         async function restartGame() {
             gameOverScreen.classList.add('hidden');
-
-            // 倒计时
             await startCountdown();
 
-            // 重置游戏状态
-            player.y = 250;
-            player.velocityY = 0;
+            player.x = 150;
+            player.y = GROUND_Y;
+            player.onFloor = true;
+            player.flipping = false;
+            player.flipProgress = 0;
+            player.runFrame = 0;
+
             obstacles = [];
             score = 0;
+            obstacleSpeed = 4;
             obstacleSpawnTimer = 0;
-            obstacleSpawnInterval = 150;
-            obstacleSpeed = 1;
-            difficultyLevel = 1;
             updateScoreDisplay();
 
             gameRunning = true;
             gameLoop();
         }
 
-        // 返回菜单
         async function backToMenu() {
             gameOverScreen.classList.add('hidden');
             startScreen.classList.remove('hidden');
             await renderLeaderboard();
         }
 
-        // 鼠标点击事件
-        canvas.addEventListener('click', playerJump);
-
-        // 触摸事件（移动端支持）
+        // ============ INPUT HANDLERS ============
+        canvas.addEventListener('click', flipGravity);
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            playerJump();
+            flipGravity();
         });
 
-        // 键盘空格键支持
         document.addEventListener('keydown', (e) => {
             if (e.code === 'Space') {
                 e.preventDefault();
                 if (gameRunning) {
-                    playerJump();
+                    flipGravity();
                 } else if (!startScreen.classList.contains('hidden')) {
                     startGame();
                 } else if (!gameOverScreen.classList.contains('hidden')) {
@@ -1260,11 +950,10 @@
             }
         });
 
-        // 初始绘制
+        // Initial render
         drawBackground();
-        drawPlayer();
-
-        // 渲染排行榜
+        drawCeiling();
+        drawFloor();
         renderLeaderboard();
     </script>
 </body>
