@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Space Game - 太空躲避游戏</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Space Game</title>
     <style>
         * {
             margin: 0;
@@ -23,15 +23,20 @@
 
         #gameContainer {
             position: relative;
+            width: 1000px;
+            height: 600px;
         }
 
         #gameCanvas {
             display: block;
+            width: 100%;
+            height: 100%;
             border: 3px solid #4a4a8a;
             border-radius: 10px;
             box-shadow: 0 0 30px rgba(100, 100, 255, 0.3);
         }
 
+        /* UI 元素 */
         #score {
             position: absolute;
             top: 20px;
@@ -40,6 +45,26 @@
             font-size: 24px;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        #langBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        #langBtn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
 
         #startScreen, #gameOverScreen {
@@ -56,6 +81,7 @@
             border-radius: 10px;
             color: white;
             text-align: center;
+            padding: 20px;
         }
 
         #startScreen h1, #gameOverScreen h1 {
@@ -97,24 +123,199 @@
         .hidden {
             display: none !important;
         }
+
+        /* 名字输入样式 */
+        #nameInputContainer {
+            margin: 20px 0;
+        }
+
+        #playerName {
+            padding: 12px 20px;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            width: 200px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        #playerName:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        #playerName::placeholder {
+            color: #888;
+        }
+
+        /* 排行榜样式 */
+        #leaderboard {
+            margin-top: 20px;
+            padding: 15px 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-height: 250px;
+            overflow-y: auto;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        #leaderboard h3 {
+            color: #ffaa00;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 16px;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-rank {
+            width: 30px;
+            color: #888;
+            font-weight: bold;
+        }
+
+        .leaderboard-rank.top1 { color: #ffd700; }
+        .leaderboard-rank.top2 { color: #c0c0c0; }
+        .leaderboard-rank.top3 { color: #cd7f32; }
+
+        .leaderboard-name {
+            flex: 1;
+            text-align: left;
+            color: #fff;
+            padding-left: 10px;
+        }
+
+        .leaderboard-score {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .highscore-badge {
+            display: inline-block;
+            background: linear-gradient(to bottom, #ffd700, #ff8c00);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        /* 排行榜翻页 */
+        .leaderboard-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .page-btn {
+            padding: 5px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        /* 滚动条样式 */
+        #leaderboard::-webkit-scrollbar {
+            width: 6px;
+        }
+        #leaderboard::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+        #leaderboard::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        /* 倒计时样式 */
+        #countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            color: #00ffff;
+            text-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff;
+            animation: pulse 0.5s ease-in-out;
+            z-index: 50;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
     </style>
 </head>
 <body>
     <div id="gameContainer">
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-        <div id="score">分数: 0</div>
+        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+        <button id="langBtn" onclick="toggleLanguage()">中文</button>
+        <div id="score">Score: 0</div>
+        <div id="countdown" class="hidden"></div>
 
         <div id="startScreen">
             <h1>🚀 SPACE GAME</h1>
-            <p>点击鼠标让小人物上升，躲避障碍物！</p>
-            <p>不点击会自动下滑，碰到障碍物游戏结束</p>
-            <button class="btn" onclick="startGame()">开始游戏</button>
+            <p data-zh="点击鼠标让飞行器上升，穿越洞穴！" data-en="Click to fly up and navigate through the cave!">Click to fly up and navigate through the cave!</p>
+            <p data-zh="不点击会自动下滑，不要碰到洞穴壁" data-en="Release to fall down. Don't hit the cave walls!">Release to fall down. Don't hit the cave walls!</p>
+
+            <div id="nameInputContainer">
+                <input type="text" id="playerName" maxlength="10" placeholder="Enter your name" data-zh-placeholder="输入你的名字">
+            </div>
+
+            <button class="btn" onclick="startGame()" data-zh="开始游戏" data-en="Start Game">Start Game</button>
+
+            <div id="leaderboard">
+                <h3 data-zh="🏆 排行榜" data-en="🏆 Leaderboard">🏆 Leaderboard</h3>
+                <div id="leaderboardList"></div>
+                <div class="leaderboard-pagination">
+                    <button class="page-btn" id="prevPageBtn" onclick="prevPage()">◀</button>
+                    <span class="page-info" id="pageInfo">1 / 1</span>
+                    <button class="page-btn" id="nextPageBtn" onclick="nextPage()">▶</button>
+                </div>
+            </div>
         </div>
 
         <div id="gameOverScreen" class="hidden">
-            <h1>💥 游戏结束</h1>
-            <div id="finalScore">分数: 0</div>
-            <button class="btn" onclick="restartGame()">再来一次</button>
+            <h1 data-zh="💥 游戏结束" data-en="💥 Game Over">💥 Game Over</h1>
+            <div id="finalScore">Score: 0</div>
+            <div id="highScoreMessage"></div>
+            <button class="btn" onclick="backToMenu()" data-zh="返回菜单" data-en="Back to Menu">Back to Menu</button>
+            <button class="btn" onclick="restartGame()" data-zh="再来一次" data-en="Play Again">Play Again</button>
         </div>
     </div>
 
@@ -125,29 +326,264 @@
         const startScreen = document.getElementById('startScreen');
         const gameOverScreen = document.getElementById('gameOverScreen');
         const finalScoreElement = document.getElementById('finalScore');
+        const langBtn = document.getElementById('langBtn');
+        const playerNameInput = document.getElementById('playerName');
+        const leaderboardList = document.getElementById('leaderboardList');
+        const highScoreMessage = document.getElementById('highScoreMessage');
+        const countdownElement = document.getElementById('countdown');
 
         // 游戏状态
         let gameRunning = false;
         let score = 0;
         let animationId;
 
+        // 排行榜管理
+        let currentPlayerName = '';
+        let isNewHighScore = false;
+        let cachedLeaderboard = [];
+        let cachedHighScores = {};
+
+        // 排行榜翻页
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        // API 基础路径
+        const API_BASE = '/api';
+
+        // 获取排行榜数据（从服务器）
+        async function getLeaderboard() {
+            try {
+                const response = await fetch(`${API_BASE}/leaderboard`);
+                const data = await response.json();
+                cachedLeaderboard = Array.isArray(data) ? data : [];
+                return cachedLeaderboard;
+            } catch (error) {
+                console.error('Error fetching leaderboard:', error);
+                return cachedLeaderboard;
+            }
+        }
+
+        // 更新排行榜（到服务器）
+        async function updateLeaderboard(name, score) {
+            try {
+                const response = await fetch(`${API_BASE}/leaderboard`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, score })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    cachedLeaderboard = result.leaderboard;
+                    return result.leaderboard;
+                }
+            } catch (error) {
+                console.error('Error updating leaderboard:', error);
+            }
+            return cachedLeaderboard;
+        }
+
+        // 获取玩家的最高分
+        async function getPlayerHighScore(name) {
+            // 先检查缓存
+            if (cachedHighScores[name] !== undefined) {
+                return cachedHighScores[name];
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/highscore/${encodeURIComponent(name)}`);
+                const data = await response.json();
+                cachedHighScores[name] = data.score;
+                return data.score;
+            } catch (error) {
+                console.error('Error getting high score:', error);
+                return 0;
+            }
+        }
+
+        // 检查是否是新纪录
+        async function checkHighScore(name, score) {
+            const highScore = await getPlayerHighScore(name);
+            return score > highScore;
+        }
+
+        // 渲染排行榜
+        async function renderLeaderboard() {
+            const leaderboard = await getLeaderboard();
+
+            if (leaderboard.length === 0) {
+                leaderboardList.innerHTML = `<p style="color: #888; font-size: 14px;" data-zh="暂无记录" data-en="No records yet">No records yet</p>`;
+                updatePagination(0);
+                return;
+            }
+
+            // 计算分页
+            const totalPages = Math.ceil(leaderboard.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, leaderboard.length);
+            const currentPageData = leaderboard.slice(startIndex, endIndex);
+
+            let html = '';
+            currentPageData.forEach((entry, index) => {
+                const globalIndex = startIndex + index;
+                const rankClass = globalIndex === 0 ? 'top1' : globalIndex === 1 ? 'top2' : globalIndex === 2 ? 'top3' : '';
+                html += `
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-rank ${rankClass}">${globalIndex + 1}</span>
+                        <span class="leaderboard-name">${entry.name}</span>
+                        <span class="leaderboard-score">${entry.score}</span>
+                    </div>
+                `;
+            });
+
+            leaderboardList.innerHTML = html;
+            updatePagination(totalPages);
+        }
+
+        // 更新翻页按钮
+        function updatePagination(totalPages) {
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+
+            if (totalPages === 0) {
+                pageInfo.textContent = '0 / 0';
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+            } else {
+                pageInfo.textContent = `${currentPage} / ${totalPages}`;
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage === totalPages;
+            }
+        }
+
+        // 上一页
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderLeaderboard();
+            }
+        }
+
+        // 下一页
+        function nextPage() {
+            const totalPages = Math.ceil(cachedLeaderboard.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderLeaderboard();
+            }
+        }
+
+        // 语言设置
+        let currentLang = 'en'; // 'en' or 'zh'
+        const texts = {
+            en: {
+                score: 'Score',
+                finalScore: 'Score',
+                newRecord: '🎉 New Personal Record!',
+                yourBest: 'Your Best: ',
+                novice: 'Novice',
+                easy: 'Easy',
+                normal: 'Normal',
+                hard: 'Hard',
+                expert: 'Expert',
+                master: 'Master',
+                legend: 'Legend',
+                champion: 'Champion'
+            },
+            zh: {
+                score: '分数',
+                finalScore: '分数',
+                newRecord: '🎉 新个人纪录！',
+                yourBest: '你的最高分: ',
+                novice: '新手',
+                easy: '简单',
+                normal: '普通',
+                hard: '困难',
+                expert: '专家',
+                master: '大师',
+                legend: '传奇',
+                champion: '冠军'
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            langBtn.textContent = currentLang === 'en' ? '中文' : 'English';
+
+            // 更新所有带 data-zh 和 data-en 的元素
+            document.querySelectorAll('[data-zh]').forEach(el => {
+                el.textContent = el.getAttribute(`data-${currentLang}`);
+            });
+
+            // 更新 placeholder
+            const nameInput = document.getElementById('playerName');
+            nameInput.placeholder = currentLang === 'en' ? 'Enter your name' : '输入你的名字';
+
+            // 更新分数显示
+            updateScoreDisplay();
+            // 重新渲染排行榜（更新标题）
+            renderLeaderboard();
+        }
+
+        function updateScoreDisplay() {
+            const label = texts[currentLang].score;
+            scoreElement.innerHTML = `${label}: ${score}`;
+            finalScoreElement.textContent = `${texts[currentLang].finalScore}: ${score}`;
+        }
+
+        // 倒计时开始游戏
+        async function startCountdown() {
+            countdownElement.classList.remove('hidden');
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+
+            const countdowns = ['3', '2', '1', 'GO!'];
+
+            for (let i = 0; i < countdowns.length; i++) {
+                countdownElement.textContent = countdowns[i];
+                // 重置动画
+                countdownElement.style.animation = 'none';
+                countdownElement.offsetHeight; // 触发重排
+                countdownElement.style.animation = 'pulse 0.5s ease-in-out';
+
+                await new Promise(resolve => setTimeout(resolve, 800));
+            }
+
+            countdownElement.classList.add('hidden');
+        }
+
         // 玩家对象
         const player = {
             x: 100,
             y: 250,
-            width: 40,
-            height: 40,
+            width: 35,
+            height: 25,
             velocityY: 0,
-            gravity: 0.3,
-            jumpForce: -7,
+            gravity: 0.08,      // 重力加速度（很慢）
+            jumpForce: -4,      // 跳跃力度（上升更明显）
+            maxVelocity: 5,     // 最大速度
             color: '#00ffff'
         };
 
         // 障碍物数组
         let obstacles = [];
-        let obstacleSpeed = 4;
+        let obstacleSpeed = 1;
         let obstacleSpawnTimer = 0;
-        let obstacleSpawnInterval = 90;
+        let obstacleSpawnInterval = 150;
+
+        // 难度参数（基于分数连续平滑变化）
+        function getDifficultyParams() {
+            // 分数越高，速度越快，通道越窄
+            // 速度: 从1.0开始，每100分增加0.1，最高2.0
+            const speed = Math.min(2.0, 1.0 + score / 1000);
+
+            // 通道宽度: 从320px开始，每100分减少5px，最低200px
+            const gap = Math.max(200, 320 - score / 20);
+
+            return { speed, gap };
+        }
 
         // 星星背景
         let stars = [];
@@ -183,49 +619,49 @@
             });
         }
 
-        // 绘制玩家（太空小人）
+        // 绘制玩家（飞行器）
         function drawPlayer() {
             const x = player.x;
             const y = player.y;
 
             // 发光效果
-            ctx.shadowBlur = 20;
+            ctx.shadowBlur = 15;
             ctx.shadowColor = player.color;
 
-            // 身体
+            // 飞行器主体 - 椭圆形
             ctx.fillStyle = player.color;
             ctx.beginPath();
-            ctx.arc(x + player.width/2, y + player.height/2, player.width/2, 0, Math.PI * 2);
+            ctx.ellipse(x + player.width/2, y + player.height/2, player.width/2, player.height/2, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // 面罩
+            // 驾驶舱
             ctx.fillStyle = '#003366';
             ctx.beginPath();
-            ctx.ellipse(x + player.width/2 + 5, y + player.height/2 - 3, 12, 10, 0, 0, Math.PI * 2);
+            ctx.ellipse(x + player.width/2 + 8, y + player.height/2 - 2, 8, 6, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // 面罩反光
+            // 驾驶舱反光
             ctx.fillStyle = '#00ffff';
             ctx.beginPath();
-            ctx.ellipse(x + player.width/2 + 8, y + player.height/2 - 5, 4, 3, -0.3, 0, Math.PI * 2);
+            ctx.ellipse(x + player.width/2 + 10, y + player.height/2 - 3, 3, 2, -0.3, 0, Math.PI * 2);
             ctx.fill();
 
-            // 推进器火焰
-            if (player.velocityY < 0) {
+            // 推进器火焰 - 上升时显示
+            if (player.velocityY < -0.5) {
                 ctx.shadowColor = '#ff6600';
+                const flameLength = Math.abs(player.velocityY) * 3 + 10;
                 ctx.fillStyle = '#ff6600';
-                const flameLength = 15 + Math.random() * 10;
                 ctx.beginPath();
-                ctx.moveTo(x - 5, y + player.height/2 + 10);
-                ctx.lineTo(x - flameLength, y + player.height/2 + 5);
-                ctx.lineTo(x - 5, y + player.height/2);
+                ctx.moveTo(x - 2, y + player.height/2 + 3);
+                ctx.lineTo(x - flameLength, y + player.height/2);
+                ctx.lineTo(x - 2, y + player.height/2 - 3);
                 ctx.fill();
 
                 ctx.fillStyle = '#ffff00';
                 ctx.beginPath();
-                ctx.moveTo(x - 5, y + player.height/2 + 8);
-                ctx.lineTo(x - flameLength * 0.6, y + player.height/2 + 5);
-                ctx.lineTo(x - 5, y + player.height/2 + 2);
+                ctx.moveTo(x - 2, y + player.height/2 + 2);
+                ctx.lineTo(x - flameLength * 0.5, y + player.height/2);
+                ctx.lineTo(x - 2, y + player.height/2 - 2);
                 ctx.fill();
             }
 
@@ -236,63 +672,138 @@
         function updatePlayer() {
             // 应用重力
             player.velocityY += player.gravity;
+
+            // 限制最大速度（上升和下降对称）
+            if (player.velocityY > player.maxVelocity) {
+                player.velocityY = player.maxVelocity;
+            }
+            if (player.velocityY < -player.maxVelocity) {
+                player.velocityY = -player.maxVelocity;
+            }
+
             player.y += player.velocityY;
 
-            // 边界检测
-            if (player.y < 0) {
-                player.y = 0;
-                player.velocityY = 0;
-            }
-            if (player.y + player.height > canvas.height) {
-                player.y = canvas.height - player.height;
-                player.velocityY = 0;
+            // 边界检测（碰到上下边界游戏结束）
+            if (player.y < 0 || player.y + player.height > canvas.height) {
+                gameOver();
             }
         }
 
-        // 玩家跳跃（点击时）
+        // 绘制上下边界的岩石尖刺
+        function drawBoundarySpikes() {
+            const spikeWidth = 40;
+            const spikeHeight = 25;
+            const numSpikes = Math.ceil(canvas.width / spikeWidth);
+
+            ctx.fillStyle = '#4a3728';
+            ctx.strokeStyle = '#ff4444';
+            ctx.lineWidth = 2;
+
+            // 上方尖刺
+            for (let i = 0; i < numSpikes; i++) {
+                const x = i * spikeWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x + spikeWidth / 2, spikeHeight);
+                ctx.lineTo(x + spikeWidth, 0);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // 下方尖刺
+            for (let i = 0; i < numSpikes; i++) {
+                const x = i * spikeWidth;
+                ctx.beginPath();
+                ctx.moveTo(x, canvas.height);
+                ctx.lineTo(x + spikeWidth / 2, canvas.height - spikeHeight);
+                ctx.lineTo(x + spikeWidth, canvas.height);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            // 发光警告效果
+            ctx.shadowColor = '#ff0000';
+            ctx.shadowBlur = 10;
+            ctx.strokeStyle = '#ff4444';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, spikeHeight);
+            ctx.lineTo(canvas.width, spikeHeight);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height - spikeHeight);
+            ctx.lineTo(canvas.width, canvas.height - spikeHeight);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        // 玩家跳跃（点击时）- 增加向上的速度而不是直接设置
         function playerJump() {
             if (gameRunning) {
-                player.velocityY = player.jumpForce;
+                // 增加向上速度（累加而不是替换，产生惯性效果）
+                player.velocityY += player.jumpForce;
             }
         }
 
         // 生成障碍物
         function spawnObstacle() {
-            const type = Math.floor(Math.random() * 3);
-            let obstacle;
+            const params = getDifficultyParams();
+
+            // 根据分数决定障碍物类型
+            // 0-300分: 只用单个障碍物
+            // 300-600分: 80%单个, 20%柱子对
+            // 600-1000分: 60%单个, 30%柱子对, 10%移动
+            // 1000分+: 50%单个, 30%柱子对, 20%移动
+            let type;
+            const r = Math.random();
+            if (score < 300) {
+                type = 'single';
+            } else if (score < 600) {
+                type = r < 0.8 ? 'single' : 'short';
+            } else if (score < 1000) {
+                type = r < 0.6 ? 'single' : r < 0.9 ? 'short' : 'moving';
+            } else {
+                type = r < 0.5 ? 'single' : r < 0.8 ? 'short' : 'moving';
+            }
+
+            const baseY = canvas.height / 2;
+            let obstacle = {
+                x: canvas.width,
+                type: type,
+                passed: false
+            };
 
             switch(type) {
-                case 0: // 陨石
-                    obstacle = {
-                        x: canvas.width,
-                        y: Math.random() * (canvas.height - 60) + 30,
-                        width: 50 + Math.random() * 30,
-                        height: 50 + Math.random() * 30,
-                        type: 'meteor',
-                        rotation: 0,
-                        rotationSpeed: (Math.random() - 0.5) * 0.1
-                    };
+                case 'single':
+                    // 单个短障碍物（上下随机）
+                    obstacle.y = Math.random() < 0.5 ?
+                        Math.random() * 80 + 30 : // 上方
+                        canvas.height - Math.random() * 80 - 50; // 下方
+                    obstacle.width = 30;
+                    obstacle.height = 40 + Math.random() * 20;
+                    obstacle.isTop = obstacle.y < canvas.height / 2;
+                    obstacle.color = '#8B4513';
                     break;
-                case 1: // 激光束（上下移动）
-                    obstacle = {
-                        x: canvas.width,
-                        y: Math.random() * (canvas.height - 100) + 50,
-                        width: 20,
-                        height: 80 + Math.random() * 60,
-                        type: 'laser',
-                        moveY: (Math.random() - 0.5) * 3
-                    };
+
+                case 'short':
+                    // 短柱子对（上下都有，但中间通道宽）
+                    obstacle.y = baseY;
+                    obstacle.gap = params.gap;
+                    obstacle.width = 40;
+                    obstacle.color = '#A0522D';
                     break;
-                case 2: // 旋转的卫星
-                    obstacle = {
-                        x: canvas.width,
-                        y: Math.random() * (canvas.height - 80) + 40,
-                        width: 60,
-                        height: 40,
-                        type: 'satellite',
-                        rotation: 0,
-                        rotationSpeed: 0.05
-                    };
+
+                case 'moving':
+                    // 移动障碍物
+                    obstacle.y = Math.random() * (canvas.height - 150) + 75;
+                    obstacle.width = 35;
+                    obstacle.height = 50;
+                    obstacle.moveY = (Math.random() < 0.5 ? 1 : -1) * (1.5 + Math.random());
+                    obstacle.isFloating = true;
+                    obstacle.color = '#CD853F';
                     break;
             }
 
@@ -303,64 +814,208 @@
         function drawObstacles() {
             obstacles.forEach(obs => {
                 ctx.save();
-                ctx.translate(obs.x + obs.width/2, obs.y + obs.height/2);
 
                 switch(obs.type) {
-                    case 'meteor':
-                        ctx.rotate(obs.rotation);
-                        // 陨石主体
-                        ctx.fillStyle = '#8B4513';
-                        ctx.beginPath();
-                        ctx.arc(0, 0, obs.width/2, 0, Math.PI * 2);
-                        ctx.fill();
-                        // 陨石坑
-                        ctx.fillStyle = '#654321';
-                        ctx.beginPath();
-                        ctx.arc(-5, -5, obs.width/6, 0, Math.PI * 2);
-                        ctx.fill();
-                        ctx.beginPath();
-                        ctx.arc(8, 3, obs.width/8, 0, Math.PI * 2);
-                        ctx.fill();
-                        obs.rotation += obs.rotationSpeed;
+                    case 'single':
+                        drawSingleObstacle(obs);
                         break;
-
-                    case 'laser':
-                        // 激光束
-                        ctx.shadowBlur = 15;
-                        ctx.shadowColor = '#ff0000';
-                        ctx.fillStyle = '#ff0000';
-                        ctx.fillRect(-obs.width/2, -obs.height/2, obs.width, obs.height);
-                        ctx.fillStyle = '#ffff00';
-                        ctx.fillRect(-obs.width/4, -obs.height/2 + 5, obs.width/2, obs.height - 10);
-                        ctx.shadowBlur = 0;
+                    case 'short':
+                        drawPairObstacle(obs);
                         break;
-
-                    case 'satellite':
-                        ctx.rotate(obs.rotation);
-                        // 卫星主体
-                        ctx.fillStyle = '#cccccc';
-                        ctx.fillRect(-15, -10, 30, 20);
-                        // 太阳能板
-                        ctx.fillStyle = '#3366ff';
-                        ctx.fillRect(-45, -8, 25, 16);
-                        ctx.fillRect(20, -8, 25, 16);
-                        // 天线
-                        ctx.strokeStyle = '#999999';
-                        ctx.lineWidth = 2;
-                        ctx.beginPath();
-                        ctx.moveTo(0, -10);
-                        ctx.lineTo(0, -20);
-                        ctx.stroke();
-                        ctx.fillStyle = '#ff0000';
-                        ctx.beginPath();
-                        ctx.arc(0, -20, 3, 0, Math.PI * 2);
-                        ctx.fill();
-                        obs.rotation += obs.rotationSpeed;
+                    case 'moving':
+                        drawMovingObstacle(obs);
                         break;
                 }
 
                 ctx.restore();
             });
+        }
+
+        // 绘制单个障碍物
+        function drawSingleObstacle(obs) {
+            const gradient = ctx.createLinearGradient(obs.x, 0, obs.x + obs.width, 0);
+            gradient.addColorStop(0, '#654321');
+            gradient.addColorStop(0.5, obs.color);
+            gradient.addColorStop(1, '#654321');
+
+            ctx.fillStyle = gradient;
+
+            // 主体
+            ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+
+            // 岩石纹理
+            ctx.fillStyle = '#4a3728';
+            for (let i = 0; i < 3; i++) {
+                const rx = obs.x + 5 + Math.random() * (obs.width - 10);
+                const ry = obs.y + 5 + Math.random() * (obs.height - 10);
+                ctx.beginPath();
+                ctx.arc(rx, ry, 3 + Math.random() * 4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 边缘发光
+            ctx.strokeStyle = '#ff6644';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#ff4444';
+            ctx.shadowBlur = 8;
+            ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
+            ctx.shadowBlur = 0;
+        }
+
+        // 绘制对障碍物（上下都有）
+        function drawPairObstacle(obs) {
+            const gapTop = obs.y - obs.gap / 2;
+            const gapBottom = obs.y + obs.gap / 2;
+
+            const gradient = ctx.createLinearGradient(obs.x, 0, obs.x + obs.width, 0);
+            gradient.addColorStop(0, '#654321');
+            gradient.addColorStop(0.5, obs.color);
+            gradient.addColorStop(1, '#654321');
+
+            ctx.fillStyle = gradient;
+
+            // 上方柱子
+            if (gapTop > 0) {
+                ctx.fillRect(obs.x, 0, obs.width, gapTop);
+
+                // 锯齿边缘
+                ctx.fillStyle = '#4a3728';
+                for (let i = 0; i < obs.width; i += 12) {
+                    ctx.beginPath();
+                    ctx.moveTo(obs.x + i, gapTop);
+                    ctx.lineTo(obs.x + i + 6, gapTop - 8);
+                    ctx.lineTo(obs.x + i + 12, gapTop);
+                    ctx.fill();
+                }
+                ctx.fillStyle = gradient;
+            }
+
+            // 下方柱子
+            if (gapBottom < canvas.height) {
+                ctx.fillRect(obs.x, gapBottom, obs.width, canvas.height - gapBottom);
+
+                // 锯齿边缘
+                ctx.fillStyle = '#4a3728';
+                for (let i = 0; i < obs.width; i += 12) {
+                    ctx.beginPath();
+                    ctx.moveTo(obs.x + i, gapBottom);
+                    ctx.lineTo(obs.x + i + 6, gapBottom + 8);
+                    ctx.lineTo(obs.x + i + 12, gapBottom);
+                    ctx.fill();
+                }
+            }
+
+            // 危险发光边缘
+            ctx.strokeStyle = obs.type === 'narrow' ? '#ff0000' : '#ff6644';
+            ctx.lineWidth = obs.type === 'narrow' ? 3 : 2;
+            ctx.shadowColor = obs.type === 'narrow' ? '#ff0000' : '#ff4444';
+            ctx.shadowBlur = obs.type === 'narrow' ? 20 : 10;
+
+            if (gapTop > 0) {
+                ctx.beginPath();
+                ctx.moveTo(obs.x, gapTop);
+                ctx.lineTo(obs.x + obs.width, gapTop);
+                ctx.stroke();
+            }
+            if (gapBottom < canvas.height) {
+                ctx.beginPath();
+                ctx.moveTo(obs.x, gapBottom);
+                ctx.lineTo(obs.x + obs.width, gapBottom);
+                ctx.stroke();
+            }
+            ctx.shadowBlur = 0;
+        }
+
+        // 绘制移动障碍物
+        function drawMovingObstacle(obs) {
+            const gradient = ctx.createRadialGradient(
+                obs.x + obs.width/2, obs.y + obs.height/2, 0,
+                obs.x + obs.width/2, obs.y + obs.height/2, obs.width
+            );
+            gradient.addColorStop(0, '#DEB887');
+            gradient.addColorStop(1, obs.color);
+
+            ctx.fillStyle = gradient;
+
+            // 圆形石头
+            ctx.beginPath();
+            ctx.arc(obs.x + obs.width/2, obs.y + obs.height/2, obs.width/2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 纹理
+            ctx.fillStyle = '#8B4513';
+            ctx.beginPath();
+            ctx.arc(obs.x + obs.width/2 - 5, obs.y + obs.height/2 - 5, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(obs.x + obs.width/2 + 3, obs.y + obs.height/2 + 3, 3, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 发光边缘
+            ctx.strokeStyle = '#ffaa00';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#ff6600';
+            ctx.shadowBlur = 12;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+        }
+
+        // 绘制锯齿障碍物
+        function drawZigzagObstacle(obs) {
+            const gapTop = obs.y - obs.gap / 2;
+            const gapBottom = obs.y + obs.gap / 2;
+
+            ctx.fillStyle = obs.color;
+
+            // 上方锯齿
+            if (gapTop > 0) {
+                ctx.beginPath();
+                ctx.moveTo(obs.x, 0);
+                for (let y = 0; y < gapTop - 15; y += 15) {
+                    ctx.lineTo(obs.x + obs.width/2, y + 7);
+                    ctx.lineTo(obs.x, y + 15);
+                }
+                ctx.lineTo(obs.x, gapTop);
+                ctx.lineTo(obs.x + obs.width, gapTop);
+                ctx.lineTo(obs.x + obs.width, 0);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // 下方锯齿
+            if (gapBottom < canvas.height) {
+                ctx.beginPath();
+                ctx.moveTo(obs.x, canvas.height);
+                for (let y = canvas.height; y > gapBottom + 15; y -= 15) {
+                    ctx.lineTo(obs.x + obs.width/2, y - 7);
+                    ctx.lineTo(obs.x, y - 15);
+                }
+                ctx.lineTo(obs.x, gapBottom);
+                ctx.lineTo(obs.x + obs.width, gapBottom);
+                ctx.lineTo(obs.x + obs.width, canvas.height);
+                ctx.closePath();
+                ctx.fill();
+            }
+
+            // 边缘
+            ctx.strokeStyle = '#ff4444';
+            ctx.lineWidth = 2;
+            ctx.shadowColor = '#ff0000';
+            ctx.shadowBlur = 10;
+
+            if (gapTop > 0) {
+                ctx.beginPath();
+                ctx.moveTo(obs.x, gapTop);
+                ctx.lineTo(obs.x + obs.width, gapTop);
+                ctx.stroke();
+            }
+            if (gapBottom < canvas.height) {
+                ctx.beginPath();
+                ctx.moveTo(obs.x, gapBottom);
+                ctx.lineTo(obs.x + obs.width, gapBottom);
+                ctx.stroke();
+            }
+            ctx.shadowBlur = 0;
         }
 
         // 更新障碍物
@@ -369,19 +1024,19 @@
             if (obstacleSpawnTimer >= obstacleSpawnInterval) {
                 spawnObstacle();
                 obstacleSpawnTimer = 0;
-                // 随分数增加难度
-                if (obstacleSpawnInterval > 50) {
-                    obstacleSpawnInterval -= 0.5;
-                }
             }
+
+            // 获取平滑的难度参数
+            const params = getDifficultyParams();
+            obstacleSpeed = params.speed;
 
             obstacles.forEach((obs, index) => {
                 obs.x -= obstacleSpeed;
 
-                // 激光上下移动
-                if (obs.type === 'laser') {
+                // 移动障碍物的垂直运动
+                if (obs.isFloating) {
                     obs.y += obs.moveY;
-                    if (obs.y < 20 || obs.y + obs.height > canvas.height - 20) {
+                    if (obs.y < 30 || obs.y + obs.height > canvas.height - 30) {
                         obs.moveY *= -1;
                     }
                 }
@@ -390,30 +1045,53 @@
                 if (obs.x + obs.width < 0) {
                     obstacles.splice(index, 1);
                     score += 10;
-                    scoreElement.textContent = `分数: ${score}`;
+                    updateScoreDisplay();
                 }
             });
-
-            // 随分数增加速度
-            obstacleSpeed = 4 + Math.floor(score / 100) * 0.5;
         }
 
         // 碰撞检测
         function checkCollision() {
             for (let obs of obstacles) {
-                // 简化的矩形碰撞检测
-                const playerCenterX = player.x + player.width/2;
-                const playerCenterY = player.y + player.height/2;
-                const obsCenterX = obs.x + obs.width/2;
-                const obsCenterY = obs.y + obs.height/2;
-                const radiusSum = player.width/2 + Math.min(obs.width, obs.height)/2 - 10;
+                const playerRight = player.x + player.width;
+                const playerLeft = player.x;
+                const playerTop = player.y;
+                const playerBottom = player.y + player.height;
+                const playerCenterY = player.y + player.height / 2;
 
-                const dx = playerCenterX - obsCenterX;
-                const dy = playerCenterY - obsCenterY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
+                const obsRight = obs.x + obs.width;
+                const obsLeft = obs.x;
 
-                if (distance < radiusSum) {
-                    return true;
+                // 水平方向检测
+                if (playerRight > obsLeft && playerLeft < obsRight) {
+                    switch(obs.type) {
+                        case 'single':
+                            // 单个障碍物 - 矩形碰撞
+                            if (playerRight > obs.x && playerLeft < obs.x + obs.width &&
+                                playerBottom > obs.y && playerTop < obs.y + obs.height) {
+                                return true;
+                            }
+                            break;
+
+                        case 'short':
+                            // 对障碍物 - 检查是否在通道外
+                            const gapTop = obs.y - obs.gap / 2;
+                            const gapBottom = obs.y + obs.gap / 2;
+                            if (playerCenterY < gapTop || playerCenterY > gapBottom) {
+                                return true;
+                            }
+                            break;
+
+                        case 'moving':
+                            // 移动障碍物 - 圆形碰撞
+                            const dx = (player.x + player.width/2) - (obs.x + obs.width/2);
+                            const dy = (player.y + player.height/2) - (obs.y + obs.height/2);
+                            const distance = Math.sqrt(dx*dx + dy*dy);
+                            if (distance < player.width/2 + obs.width/2 - 5) {
+                                return true;
+                            }
+                            break;
+                    }
                 }
             }
             return false;
@@ -421,13 +1099,22 @@
 
         // 绘制背景
         function drawBackground() {
-            // 渐变背景
+            // 洞穴内部渐变背景
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#0a0a2a');
-            gradient.addColorStop(0.5, '#1a1a4a');
-            gradient.addColorStop(1, '#0a0a2a');
+            gradient.addColorStop(0, '#1a0a0a');
+            gradient.addColorStop(0.3, '#2a1a1a');
+            gradient.addColorStop(0.5, '#1a1510');
+            gradient.addColorStop(0.7, '#2a1a1a');
+            gradient.addColorStop(1, '#1a0a0a');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制洞壁纹理（上下边缘）
+            ctx.fillStyle = '#0a0505';
+            // 上方洞壁
+            ctx.fillRect(0, 0, canvas.width, 15);
+            // 下方洞壁
+            ctx.fillRect(0, canvas.height - 15, canvas.width, 15);
 
             updateStars();
             drawStars();
@@ -442,6 +1129,9 @@
 
             // 绘制背景
             drawBackground();
+
+            // 绘制边界尖刺
+            drawBoundarySpikes();
 
             // 更新和绘制玩家
             updatePlayer();
@@ -460,16 +1150,20 @@
             // 分数随时间增加
             score++;
             if (score % 10 === 0) {
-                scoreElement.textContent = `分数: ${score}`;
+                updateScoreDisplay();
             }
 
             animationId = requestAnimationFrame(gameLoop);
         }
 
         // 开始游戏
-        function startGame() {
-            startScreen.classList.add('hidden');
-            gameOverScreen.classList.add('hidden');
+        async function startGame() {
+            // 获取玩家名字
+            const name = playerNameInput.value.trim() || 'Player';
+            currentPlayerName = name;
+
+            // 倒计时
+            await startCountdown();
 
             // 重置游戏状态
             player.y = 250;
@@ -477,25 +1171,70 @@
             obstacles = [];
             score = 0;
             obstacleSpawnTimer = 0;
-            obstacleSpawnInterval = 90;
-            obstacleSpeed = 4;
-            scoreElement.textContent = `分数: 0`;
+            obstacleSpawnInterval = 150;
+            obstacleSpeed = 1;
+            difficultyLevel = 1;
+            updateScoreDisplay();
 
             gameRunning = true;
             gameLoop();
         }
 
         // 游戏结束
-        function gameOver() {
+        async function gameOver() {
             gameRunning = false;
             cancelAnimationFrame(animationId);
-            finalScoreElement.textContent = `分数: ${score}`;
+
+            // 先获取当前最高分来比较
+            const currentHighScore = await getPlayerHighScore(currentPlayerName);
+            isNewHighScore = score > currentHighScore;
+
+            // 更新排行榜
+            await updateLeaderboard(currentPlayerName, score);
+
+            // 清除缓存，确保下次获取最新数据
+            cachedHighScores[currentPlayerName] = score;
+
+            // 显示最终分数
+            finalScoreElement.textContent = `${texts[currentLang].finalScore}: ${score}`;
+
+            // 显示新纪录消息
+            if (isNewHighScore && score > 0) {
+                highScoreMessage.innerHTML = `<span class="highscore-badge">${texts[currentLang].newRecord}</span>`;
+            } else {
+                highScoreMessage.innerHTML = `<span style="color: #888;">${texts[currentLang].yourBest}${currentHighScore}</span>`;
+            }
+
             gameOverScreen.classList.remove('hidden');
         }
 
         // 重新开始
-        function restartGame() {
-            startGame();
+        async function restartGame() {
+            gameOverScreen.classList.add('hidden');
+
+            // 倒计时
+            await startCountdown();
+
+            // 重置游戏状态
+            player.y = 250;
+            player.velocityY = 0;
+            obstacles = [];
+            score = 0;
+            obstacleSpawnTimer = 0;
+            obstacleSpawnInterval = 150;
+            obstacleSpeed = 1;
+            difficultyLevel = 1;
+            updateScoreDisplay();
+
+            gameRunning = true;
+            gameLoop();
+        }
+
+        // 返回菜单
+        async function backToMenu() {
+            gameOverScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            await renderLeaderboard();
         }
 
         // 鼠标点击事件
@@ -524,6 +1263,9 @@
         // 初始绘制
         drawBackground();
         drawPlayer();
+
+        // 渲染排行榜
+        renderLeaderboard();
     </script>
 </body>
 </html>
