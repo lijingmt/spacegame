@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gravity Runner</title>
+    <title>Gravity Runner - Pixel Edition</title>
     <style>
         * {
             margin: 0;
@@ -17,7 +17,7 @@
             align-items: center;
             min-height: 100vh;
             background: linear-gradient(to bottom, #0a0a2a, #1a1a4a);
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             overflow: hidden;
         }
 
@@ -31,9 +31,11 @@
             display: block;
             width: 100%;
             height: 100%;
-            border: 3px solid #4a4a8a;
-            border-radius: 10px;
+            border: 4px solid #4a4a8a;
+            border-radius: 4px;
             box-shadow: 0 0 30px rgba(100, 100, 255, 0.3);
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
         }
 
         #score {
@@ -41,10 +43,11 @@
             top: 20px;
             left: 20px;
             color: #fff;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: bold;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
             z-index: 10;
+            font-family: Arial, sans-serif;
         }
 
         #langBtn {
@@ -54,12 +57,13 @@
             padding: 8px 16px;
             font-size: 14px;
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 20px;
             color: white;
             cursor: pointer;
             transition: all 0.3s;
             z-index: 100;
+            font-family: Arial, sans-serif;
         }
 
         #langBtn:hover {
@@ -74,13 +78,16 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
             align-items: center;
             background: rgba(0, 0, 0, 0.85);
             border-radius: 10px;
             color: white;
             text-align: center;
             padding: 20px;
+            overflow-y: auto;
+            padding-top: 30px;
+            padding-bottom: 30px;
         }
 
         #startScreen h1, #gameOverScreen h1 {
@@ -88,12 +95,14 @@
             margin-bottom: 20px;
             color: #00ffff;
             text-shadow: 0 0 20px #00ffff;
+            font-family: Arial, sans-serif;
         }
 
         #startScreen p, #gameOverScreen p {
             font-size: 18px;
             margin-bottom: 15px;
             color: #aaa;
+            font-family: Arial, sans-serif;
         }
 
         .btn {
@@ -105,8 +114,9 @@
             color: white;
             cursor: pointer;
             transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(74, 158, 255, 0.4);
             margin: 10px;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 5px 15px rgba(74, 158, 255, 0.4);
         }
 
         .btn:hover {
@@ -118,6 +128,7 @@
             font-size: 32px;
             color: #ffff00;
             margin: 20px 0;
+            font-family: Arial, sans-serif;
         }
 
         .hidden {
@@ -138,7 +149,7 @@
             text-align: center;
             width: 200px;
             outline: none;
-            transition: all 0.3s;
+            font-family: Arial, sans-serif;
         }
 
         #playerName:focus {
@@ -152,12 +163,10 @@
 
         #leaderboard {
             margin-top: 20px;
-            padding: 15px 30px;
+            padding: 20px 30px;
             background: rgba(0, 0, 0, 0.5);
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.1);
-            max-height: 250px;
-            overflow-y: auto;
             width: 90%;
             max-width: 400px;
         }
@@ -166,6 +175,7 @@
             color: #ffaa00;
             margin-bottom: 15px;
             font-size: 20px;
+            font-family: Arial, sans-serif;
         }
 
         .leaderboard-item {
@@ -174,6 +184,7 @@
             padding: 8px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             font-size: 16px;
+            font-family: Arial, sans-serif;
         }
 
         .leaderboard-item:last-child {
@@ -186,14 +197,14 @@
             font-weight: bold;
         }
 
-        .leaderboard-rank.top1 { color: #ffd700; }
-        .leaderboard-rank.top2 { color: #c0c0c0; }
-        .leaderboard-rank.top3 { color: #cd7f32; }
+        .leaderboard-rank.top1 { color: #ffff00; }
+        .leaderboard-rank.top2 { color: #aaaaaa; }
+        .leaderboard-rank.top3 { color: #ff8800; }
 
         .leaderboard-name {
             flex: 1;
             text-align: left;
-            color: #fff;
+            color: #00ff00;
             padding-left: 10px;
         }
 
@@ -229,6 +240,7 @@
             color: white;
             cursor: pointer;
             transition: all 0.3s;
+            font-family: Arial, sans-serif;
         }
 
         .page-btn:hover:not(:disabled) {
@@ -243,20 +255,25 @@
         .page-info {
             color: #aaa;
             font-size: 14px;
+            font-family: Arial, sans-serif;
         }
 
         #leaderboard::-webkit-scrollbar {
-            width: 6px;
+            width: 12px;
         }
 
         #leaderboard::-webkit-scrollbar-track {
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
+            border-radius: 6px;
         }
 
         #leaderboard::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 6px;
+        }
+
+        #leaderboard::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.6);
         }
 
         #countdown {
@@ -269,6 +286,7 @@
             text-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff;
             animation: pulse 0.5s ease-in-out;
             z-index: 50;
+            font-family: Arial, sans-serif;
         }
 
         @keyframes pulse {
@@ -295,26 +313,27 @@
     <div id="gameContainer">
         <canvas id="gameCanvas" width="1000" height="600"></canvas>
         <button id="langBtn" onclick="toggleLanguage()">中文</button>
-        <div id="score">Score: 0</div>
+        <div id="score">SCORE: 0</div>
         <div id="countdown" class="hidden"></div>
 
         <div id="startScreen">
-            <h1>🏃 GRAVITY RUNNER</h1>
+            <h1>▶ GRAVITY RUNNER ◀</h1>
             <div class="instructions">
-                <p data-zh="🎮 玩法说明:" data-en="🎮 How to Play:">🎮 How to Play:</p>
-                <p data-zh="• 玩家在地板上奔跑，点击屏幕翻转重力到天花板" data-en="• Player runs on the floor. Click to flip gravity to the ceiling!">• Player runs on the floor. Click to flip gravity to the ceiling!</p>
-                <p data-zh="• 躲避地板和天花板上的尖刺障碍物" data-en="• Avoid the spike obstacles on both floor and ceiling!">• Avoid the spike obstacles on both floor and ceiling!</p>
-                <p data-zh="• 再点击一次回到地板" data-en="• Click again to return to the floor!">• Click again to return to the floor!</p>
+                <p data-zh="🎮 玩法说明:" data-en="🎮 HOW TO PLAY:">🎮 HOW TO PLAY:</p>
+                <p data-zh="▶ Player runs on the FLOOR" data-en="▶ Player runs on the FLOOR">▶ Player runs on the FLOOR</p>
+                <p data-zh="▶ CLICK to flip to CEILING" data-en="▶ CLICK to flip to CEILING">▶ CLICK to flip to CEILING</p>
+                <p data-zh="▶ Avoid SPIKES on your surface!" data-en="▶ Avoid SPIKES on your surface!">▶ Avoid SPIKES on your surface!</p>
+                <p data-zh="▶ CLICK again to return!" data-en="▶ CLICK again to return!">▶ CLICK again to return!</p>
             </div>
 
             <div id="nameInputContainer">
-                <input type="text" id="playerName" maxlength="10" placeholder="Enter your name" data-zh-placeholder="输入你的名字">
+                <input type="text" id="playerName" maxlength="10" placeholder="ENTER NAME" data-zh-placeholder="输入你的名字">
             </div>
 
-            <button class="btn" onclick="startGame()" data-zh="开始游戏" data-en="Start Game">Start Game</button>
+            <button class="btn" onclick="startGame()" data-zh="开始游戏" data-en="START GAME">START GAME</button>
 
             <div id="leaderboard">
-                <h3 data-zh="🏆 排行榜" data-en="🏆 Leaderboard">🏆 Leaderboard</h3>
+                <h3 data-zh="🏆 排行榜" data-en="🏆 HIGH SCORES">🏆 HIGH SCORES</h3>
                 <div id="leaderboardList"></div>
                 <div class="leaderboard-pagination">
                     <button class="page-btn" id="prevPageBtn" onclick="prevPage()">◀</button>
@@ -325,11 +344,11 @@
         </div>
 
         <div id="gameOverScreen" class="hidden">
-            <h1 data-zh="💥 游戏结束" data-en="💥 Game Over">💥 Game Over</h1>
-            <div id="finalScore">Score: 0</div>
+            <h1 data-zh="💥 GAME OVER" data-en="💥 GAME OVER">💥 GAME OVER</h1>
+            <div id="finalScore">SCORE: 0</div>
             <div id="highScoreMessage"></div>
-            <button class="btn" onclick="backToMenu()" data-zh="返回菜单" data-en="Back to Menu">Back to Menu</button>
-            <button class="btn" onclick="restartGame()" data-zh="再来一次" data-en="Play Again">Play Again</button>
+            <button class="btn" onclick="backToMenu()" data-zh="返回菜单" data-en="MENU">MENU</button>
+            <button class="btn" onclick="restartGame()" data-zh="再来一次" data-en="RETRY">RETRY</button>
         </div>
     </div>
 
@@ -360,6 +379,9 @@
         const itemsPerPage = 10;
 
         const API_BASE = '/api';
+
+        // ============ PIXEL SIZE ============
+        const PIXEL = 6; // Size of each "pixel" in the pixel art
 
         // ============ LEADERBOARD FUNCTIONS ============
         async function getLeaderboard() {
@@ -415,7 +437,7 @@
             const leaderboard = await getLeaderboard();
 
             if (leaderboard.length === 0) {
-                leaderboardList.innerHTML = `<p style="color: #888; font-size: 14px;" data-zh="暂无记录" data-en="No records yet">No records yet</p>`;
+                leaderboardList.innerHTML = `<p style="color: #666; font-size: 12px;" data-zh="暂无记录" data-en="NO RECORDS YET">NO RECORDS YET</p>`;
                 updatePagination(0);
                 return;
             }
@@ -431,7 +453,7 @@
                 const rankClass = globalIndex === 0 ? 'top1' : globalIndex === 1 ? 'top2' : globalIndex === 2 ? 'top3' : '';
                 html += `
                     <div class="leaderboard-item">
-                        <span class="leaderboard-rank ${rankClass}">${globalIndex + 1}</span>
+                        <span class="leaderboard-rank ${rankClass}">${globalIndex + 1}.</span>
                         <span class="leaderboard-name">${entry.name}</span>
                         <span class="leaderboard-score">${entry.score}</span>
                     </div>
@@ -477,29 +499,29 @@
         let currentLang = 'en';
         const texts = {
             en: {
-                score: 'Score',
-                finalScore: 'Score',
-                newRecord: '🎉 New Personal Record!',
-                yourBest: 'Your Best: '
+                score: 'SCORE',
+                finalScore: 'SCORE',
+                newRecord: '🎉 NEW RECORD!',
+                yourBest: 'BEST: '
             },
             zh: {
                 score: '分数',
                 finalScore: '分数',
-                newRecord: '🎉 新个人纪录！',
-                yourBest: '你的最高分: '
+                newRecord: '🎉 新纪录!',
+                yourBest: '最高分: '
             }
         };
 
         function toggleLanguage() {
             currentLang = currentLang === 'en' ? 'zh' : 'en';
-            langBtn.textContent = currentLang === 'en' ? '中文' : 'English';
+            langBtn.textContent = currentLang === 'en' ? '中文' : 'ENGLISH';
 
             document.querySelectorAll('[data-zh]').forEach(el => {
                 el.textContent = el.getAttribute(`data-${currentLang}`);
             });
 
             const nameInput = document.getElementById('playerName');
-            nameInput.placeholder = currentLang === 'en' ? 'Enter your name' : '输入你的名字';
+            nameInput.placeholder = currentLang === 'en' ? 'ENTER NAME' : '输入你的名字';
 
             updateScoreDisplay();
             renderLeaderboard();
@@ -530,17 +552,17 @@
         }
 
         // ============ GAME VARIABLES ============
-        const GROUND_Y = 500;  // Floor position
-        const CEILING_Y = 75;  // Ceiling position (player feet when upside down)
-        const PLAYER_SIZE = 40;
+        const GROUND_Y = 500;
+        const CEILING_Y = 75;
+        const PLAYER_SIZE = 42;
 
         let player = {
             x: 150,
             y: GROUND_Y,
-            onFloor: true,      // true = on floor, false = on ceiling
-            flipping: false,    // currently flipping gravity
-            flipProgress: 0,    // 0 to 1
-            runFrame: 0         // running animation frame
+            onFloor: true,
+            flipping: false,
+            flipProgress: 0,
+            runFrame: 0
         };
 
         let obstacles = [];
@@ -548,34 +570,51 @@
         let obstacleSpawnTimer = 0;
         let obstacleSpawnInterval = 100;
 
-        // Background stars
+        // Background stars (now pixel stars!)
         let stars = [];
-        for (let i = 0; i < 80; i++) {
+        for (let i = 0; i < 50; i++) {
             stars.push({
                 x: Math.random() * canvas.width,
                 y: Math.random() * canvas.height,
-                size: Math.random() * 2 + 0.5,
-                speed: Math.random() * 1.5 + 0.5
+                size: PIXEL,
+                speed: Math.random() * 1.5 + 0.5,
+                brightness: Math.random() * 0.5 + 0.5
             });
+        }
+
+        // ============ PIXEL DRAWING HELPER ============
+        function drawPixelRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(
+                Math.floor(x / PIXEL) * PIXEL,
+                Math.floor(y / PIXEL) * PIXEL,
+                Math.ceil(w / PIXEL) * PIXEL,
+                Math.ceil(h / PIXEL) * PIXEL
+            );
+        }
+
+        function drawPixel(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(Math.floor(x / PIXEL) * PIXEL, Math.floor(y / PIXEL) * PIXEL, PIXEL, PIXEL);
         }
 
         // ============ DRAWING FUNCTIONS ============
         function drawBackground() {
-            // Sky gradient
-            const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            gradient.addColorStop(0, '#0a0520');
-            gradient.addColorStop(0.5, '#150a30');
-            gradient.addColorStop(1, '#0a0520');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Pixelated sky gradient (in bands)
+            const colors = ['#0a0520', '#0d0625', '#100830', '#130a35', '#100830', '#0d0625', '#0a0520'];
+            const bandHeight = Math.ceil(canvas.height / colors.length / PIXEL) * PIXEL;
 
-            // Stars
-            ctx.fillStyle = '#ffffff';
+            for (let i = 0; i < colors.length; i++) {
+                drawPixelRect(0, i * bandHeight, canvas.width, bandHeight, colors[i]);
+            }
+
+            // Pixel stars (squares!) - no flickering!
             stars.forEach(star => {
-                ctx.globalAlpha = Math.random() * 0.4 + 0.3;
-                ctx.beginPath();
-                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-                ctx.fill();
+                ctx.globalAlpha = star.brightness;
+                const px = Math.floor(star.x / PIXEL) * PIXEL;
+                const py = Math.floor(star.y / PIXEL) * PIXEL;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(px, py, star.size, star.size);
             });
             ctx.globalAlpha = 1;
         }
@@ -591,61 +630,87 @@
         }
 
         function drawFloor() {
-            // Floor
-            const floorGradient = ctx.createLinearGradient(0, GROUND_Y + PLAYER_SIZE, 0, canvas.height);
-            floorGradient.addColorStop(0, '#3a3a5a');
-            floorGradient.addColorStop(1, '#2a2a4a');
-            ctx.fillStyle = floorGradient;
-            ctx.fillRect(0, GROUND_Y + PLAYER_SIZE, canvas.width, canvas.height - GROUND_Y - PLAYER_SIZE);
+            // Main floor area - pixelated
+            const floorY = GROUND_Y + PLAYER_SIZE;
+            const floorHeight = canvas.height - floorY;
 
-            // Floor line
-            ctx.strokeStyle = '#6a6aaa';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(0, GROUND_Y + PLAYER_SIZE);
-            ctx.lineTo(canvas.width, GROUND_Y + PLAYER_SIZE);
-            ctx.stroke();
+            // Base floor color
+            drawPixelRect(0, floorY, canvas.width, floorHeight, '#3a3a5a');
 
-            // Floor pattern
+            // Pixel pattern on floor
             ctx.fillStyle = '#4a4a7a';
-            for (let i = 0; i < canvas.width; i += 50) {
-                ctx.fillRect(i, GROUND_Y + PLAYER_SIZE + 10, 30, 5);
+            for (let i = 0; i < canvas.width; i += PIXEL * 3) {
+                ctx.fillRect(i, floorY + PIXEL * 2, PIXEL * 2, PIXEL);
+            }
+
+            // Floor line (bright edge)
+            drawPixelRect(0, floorY - PIXEL, canvas.width, PIXEL, '#6a6aaa');
+
+            // Dark pixels near edge for depth
+            ctx.fillStyle = '#2a2a4a';
+            for (let i = 0; i < canvas.width; i += PIXEL * 2) {
+                ctx.fillRect(i, floorY + PIXEL, PIXEL, PIXEL);
             }
         }
 
         function drawCeiling() {
-            // Ceiling
-            const ceilGradient = ctx.createLinearGradient(0, 0, 0, CEILING_Y);
-            ceilGradient.addColorStop(0, '#2a2a4a');
-            ceilGradient.addColorStop(1, '#3a3a5a');
-            ctx.fillStyle = ceilGradient;
-            ctx.fillRect(0, 0, canvas.width, CEILING_Y);
+            // Main ceiling area
+            const ceilHeight = CEILING_Y;
 
-            // Ceiling line
-            ctx.strokeStyle = '#6a6aaa';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(0, CEILING_Y);
-            ctx.lineTo(canvas.width, CEILING_Y);
-            ctx.stroke();
+            // Base ceiling color
+            drawPixelRect(0, 0, canvas.width, ceilHeight, '#2a2a4a');
 
-            // Ceiling pattern
-            ctx.fillStyle = '#4a4a7a';
-            for (let i = 0; i < canvas.width; i += 50) {
-                ctx.fillRect(i, CEILING_Y - 15, 30, 5);
+            // Pixel pattern on ceiling
+            ctx.fillStyle = '#3a3a5a';
+            for (let i = 0; i < canvas.width; i += PIXEL * 3) {
+                ctx.fillRect(i, CEILING_Y - PIXEL * 3, PIXEL * 2, PIXEL);
+            }
+
+            // Ceiling line (bright edge)
+            drawPixelRect(0, CEILING_Y, canvas.width, PIXEL, '#6a6aaa');
+
+            // Dark pixels near edge
+            ctx.fillStyle = '#1a1a2a';
+            for (let i = 0; i < canvas.width; i += PIXEL * 2) {
+                ctx.fillRect(i, CEILING_Y - PIXEL * 2, PIXEL, PIXEL);
             }
         }
+
+        // Pixel art player sprite (running character)
+        // 0 = transparent, 1 = outline, 2 = main color, 3 = highlight
+        const playerSprite = [
+            [0,0,0,1,1,1,1,0,0],
+            [0,0,1,2,2,2,2,1,0],
+            [0,1,2,3,3,2,2,1,0],
+            [0,1,2,2,2,2,2,1,0],
+            [0,1,1,2,2,1,1,0,0],
+            [1,2,2,2,2,2,2,2,1],
+            [1,2,2,1,1,2,2,2,1],
+            [0,1,1,0,0,1,1,0,0]
+        ];
+
+        const playerLegs1 = [
+            [0,0,0,0,1,0,0,0,0],
+            [0,0,0,1,2,1,0,0,0],
+            [0,0,1,2,2,2,1,0,0],
+            [0,1,2,2,2,2,2,1,0]
+        ];
+
+        const playerLegs2 = [
+            [0,0,0,0,0,1,0,0,0],
+            [0,0,0,0,1,2,1,0,0],
+            [0,0,0,1,2,2,2,1,0],
+            [0,0,1,2,2,2,2,1,0]
+        ];
 
         function drawPlayer() {
             ctx.save();
 
-            // Calculate position and rotation
             let drawX = player.x;
             let drawY = player.y;
             let rotation = 0;
 
             if (player.flipping) {
-                // During flip, interpolate position and rotation
                 const startY = player.onFloor ? GROUND_Y : CEILING_Y;
                 const endY = player.onFloor ? CEILING_Y : GROUND_Y;
                 drawY = startY + (endY - startY) * player.flipProgress;
@@ -657,81 +722,115 @@
             ctx.translate(drawX + PLAYER_SIZE / 2, drawY + PLAYER_SIZE / 2);
             ctx.rotate(rotation);
 
-            // Running animation (leg movement)
-            const legOffset = Math.sin(player.runFrame * 0.3) * 5;
+            // Draw pixel art player
+            const pixelScale = PIXEL;
+            const offsetX = -playerSprite[0].length * pixelScale / 2;
+            const offsetY = -playerSprite.length * pixelScale / 2;
 
             // Body
-            ctx.fillStyle = '#00ffff';
-            ctx.shadowColor = '#00ffff';
-            ctx.shadowBlur = 15;
-            ctx.fillRect(-PLAYER_SIZE/2 + 5, -PLAYER_SIZE/2 + 5, PLAYER_SIZE - 10, PLAYER_SIZE - 15);
+            for (let row = 0; row < playerSprite.length; row++) {
+                for (let col = 0; col < playerSprite[row].length; col++) {
+                    const pixel = playerSprite[row][col];
+                    if (pixel !== 0) {
+                        let color = '#00ffff'; // Bright cyan
+                        if (pixel === 1) color = '#00aaaa'; // Darker cyan outline
+                        else if (pixel === 3) color = '#aaffff'; // Light cyan highlight
+                        ctx.fillStyle = color;
+                        ctx.fillRect(
+                            offsetX + col * pixelScale,
+                            offsetY + row * pixelScale,
+                            pixelScale,
+                            pixelScale
+                        );
+                    }
+                }
+            }
 
-            // Head
-            ctx.beginPath();
-            ctx.arc(0, -PLAYER_SIZE/2 + 8, 10, 0, Math.PI * 2);
-            ctx.fill();
+            // Legs (animated)
+            const legFrame = Math.floor(player.runFrame / 5) % 2;
+            const legs = legFrame === 0 ? playerLegs1 : playerLegs2;
+            const legOffsetY = playerSprite.length * pixelScale;
 
-            // Eye
-            ctx.fillStyle = '#000';
-            ctx.beginPath();
-            ctx.arc(5, -PLAYER_SIZE/2 + 6, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.beginPath();
-            ctx.arc(6, -PLAYER_SIZE/2 + 5, 1, 0, Math.PI * 2);
-            ctx.fill();
+            for (let row = 0; row < legs.length; row++) {
+                for (let col = 0; col < legs[row].length; col++) {
+                    const pixel = legs[row][col];
+                    if (pixel !== 0) {
+                        let color = '#00ffff'; // Bright cyan
+                        if (pixel === 1) color = '#00aaaa'; // Darker cyan outline
+                        else if (pixel === 3) color = '#aaffff'; // Light cyan highlight
+                        ctx.fillStyle = color;
+                        ctx.fillRect(
+                            offsetX + col * pixelScale,
+                            legOffsetY + row * pixelScale,
+                            pixelScale,
+                            pixelScale
+                        );
+                    }
+                }
+            }
 
-            ctx.fillStyle = '#00ffff';
-
-            // Legs
-            ctx.fillRect(-8, PLAYER_SIZE/2 - 12 + legOffset, 6, 15);
-            ctx.fillRect(2, PLAYER_SIZE/2 - 12 - legOffset, 6, 15);
-
-            // Arms
-            ctx.fillRect(-PLAYER_SIZE/2 - 2, -5 + legOffset * 0.5, 6, 12);
-            ctx.fillRect(PLAYER_SIZE/2 - 4, -5 - legOffset * 0.5, 6, 12);
-
-            ctx.shadowBlur = 0;
             ctx.restore();
         }
 
-        function drawSpike(x, y, width, height, pointingUp) {
-            const numSpikes = Math.floor(width / 25);
+        // Pixel art spike sprites
+        // Single spike pointing up
+        const spikeUpSprite = [
+            [0,0,0,0,1,0,0,0,0],
+            [0,0,0,1,2,1,0,0,0],
+            [0,0,1,2,2,2,1,0,0],
+            [0,1,2,2,2,2,2,1,0],
+            [0,1,1,2,2,2,1,1,0],
+            [0,0,1,1,1,1,1,0,0],
+            [0,0,0,1,1,1,0,0,0]
+        ];
 
-            ctx.fillStyle = '#ff4444';
-            ctx.strokeStyle = '#ff0000';
-            ctx.lineWidth = 2;
-            ctx.shadowColor = '#ff0000';
-            ctx.shadowBlur = 10;
+        // Single spike pointing down
+        const spikeDownSprite = [
+            [0,0,0,1,1,1,0,0,0],
+            [0,0,1,1,1,1,1,0,0],
+            [0,1,1,2,2,2,1,1,0],
+            [0,1,2,2,2,2,2,1,0],
+            [0,0,1,2,2,2,1,0,0],
+            [0,0,0,1,2,1,0,0,0],
+            [0,0,0,0,1,0,0,0,0]
+        ];
 
-            for (let i = 0; i < numSpikes; i++) {
-                const spikeX = x + i * 25;
-                ctx.beginPath();
-                if (pointingUp) {
-                    ctx.moveTo(spikeX, y + height);
-                    ctx.lineTo(spikeX + 12, y);
-                    ctx.lineTo(spikeX + 25, y + height);
-                } else {
-                    ctx.moveTo(spikeX, y);
-                    ctx.lineTo(spikeX + 12, y + height);
-                    ctx.lineTo(spikeX + 25, y);
+        function drawPixelSpike(x, y, width, pointingUp) {
+            const spikeWidth = spikeUpSprite[0].length * PIXEL;
+            const numSpikes = Math.floor(width / spikeWidth);
+
+            for (let s = 0; s < numSpikes; s++) {
+                const sprite = pointingUp ? spikeUpSprite : spikeDownSprite;
+                const baseX = x + s * spikeWidth;
+                const baseY = pointingUp ? y - sprite.length * PIXEL : y;
+
+                for (let row = 0; row < sprite.length; row++) {
+                    for (let col = 0; col < sprite[row].length; col++) {
+                        const pixel = sprite[row][col];
+                        if (pixel !== 0) {
+                            let color = '#ff0000'; // Bright red
+                            if (pixel === 1) color = '#aa0000'; // Dark red outline
+                            else if (pixel === 2) color = '#ff4444'; // Light red
+
+                            ctx.fillStyle = color;
+                            ctx.fillRect(
+                                baseX + col * PIXEL,
+                                baseY + row * PIXEL,
+                                PIXEL,
+                                PIXEL
+                            );
+                        }
+                    }
                 }
-                ctx.closePath();
-                ctx.fill();
-                ctx.stroke();
             }
-
-            ctx.shadowBlur = 0;
         }
 
         function drawObstacles() {
             obstacles.forEach(obs => {
                 if (obs.onFloor) {
-                    // Spike on floor
-                    drawSpike(obs.x, GROUND_Y + PLAYER_SIZE - obs.height, obs.width, obs.height, true);
+                    drawPixelSpike(obs.x, GROUND_Y + PLAYER_SIZE, obs.width, true);
                 } else {
-                    // Spike on ceiling
-                    drawSpike(obs.x, CEILING_Y, obs.width, obs.height, false);
+                    drawPixelSpike(obs.x, CEILING_Y, obs.width, false);
                 }
             });
         }
@@ -745,10 +844,8 @@
         }
 
         function updatePlayer() {
-            // Running animation
             player.runFrame++;
 
-            // Handle flipping
             if (player.flipping) {
                 player.flipProgress += 0.08;
                 if (player.flipProgress >= 1) {
@@ -763,17 +860,14 @@
         function spawnObstacle() {
             const minWidth = 50;
             const maxWidth = 150;
-            const minSpikeHeight = 30;
-            const maxSpikeHeight = 50;
 
-            // Randomly choose floor or ceiling
             const onFloor = Math.random() < 0.5;
 
             obstacles.push({
                 x: canvas.width,
                 y: onFloor ? GROUND_Y + PLAYER_SIZE : CEILING_Y,
                 width: minWidth + Math.random() * (maxWidth - minWidth),
-                height: minSpikeHeight + Math.random() * (maxSpikeHeight - minSpikeHeight),
+                height: spikeUpSprite.length * PIXEL,
                 onFloor: onFloor,
                 passed: false
             });
@@ -789,7 +883,6 @@
             obstacles.forEach((obs, index) => {
                 obs.x -= obstacleSpeed;
 
-                // Remove when off screen
                 if (obs.x + obs.width < 0) {
                     obstacles.splice(index, 1);
                     score += 10;
@@ -797,32 +890,33 @@
                 }
             });
 
-            // Gradually increase speed
             if (score > 0 && score % 100 === 0) {
                 obstacleSpeed = Math.min(8, 4 + score / 500);
             }
         }
 
         function checkCollision() {
-            const playerLeft = player.x + 5;
-            const playerRight = player.x + PLAYER_SIZE - 5;
-            const playerFeetY = player.onFloor || (player.flipping && player.flipProgress < 0.5) ?
-                GROUND_Y + PLAYER_SIZE : CEILING_Y;
+            const playerLeft = player.x + 8;
+            const playerRight = player.x + PLAYER_SIZE - 8;
+            const playerCenterX = player.x + PLAYER_SIZE / 2;
 
             for (let obs of obstacles) {
-                // Horizontal overlap
-                if (playerRight > obs.x && playerLeft < obs.x + obs.width) {
+                // Check horizontal overlap - player must be horizontally aligned with spike
+                if (playerCenterX > obs.x && playerCenterX < obs.x + obs.width) {
                     // Check if player is on the same surface as the spike
-                    if (obs.onFloor) {
-                        // Spike is on floor - player dies if on floor
-                        if (player.onFloor || (player.flipping && player.flipProgress < 0.5)) {
-                            return true;
-                        }
-                    } else {
-                        // Spike is on ceiling - player dies if on ceiling
-                        if (!player.onFloor || (player.flipping && player.flipProgress >= 0.5)) {
-                            return true;
-                        }
+                    const playerOnFloorNow = player.onFloor && !player.flipping;
+                    const playerOnCeilingNow = !player.onFloor && !player.flipping;
+                    const playerFlippingToFloor = player.flipping && !player.onFloor && player.flipProgress >= 0.5;
+                    const playerFlippingToCeiling = player.flipping && player.onFloor && player.flipProgress >= 0.5;
+
+                    const effectivelyOnFloor = playerOnFloorNow || playerFlippingToFloor;
+                    const effectivelyOnCeiling = playerOnCeilingNow || playerFlippingToCeiling;
+
+                    if (obs.onFloor && effectivelyOnFloor) {
+                        return true; // Spike on floor, player on floor = DEAD
+                    }
+                    if (!obs.onFloor && effectivelyOnCeiling) {
+                        return true; // Spike on ceiling, player on ceiling = DEAD
                     }
                 }
             }
@@ -848,7 +942,6 @@
                 return;
             }
 
-            // Score increases with time
             score++;
             if (score % 10 === 0) {
                 updateScoreDisplay();
@@ -859,12 +952,11 @@
 
         // ============ GAME STATE FUNCTIONS ============
         async function startGame() {
-            const name = playerNameInput.value.trim() || 'Player';
+            const name = playerNameInput.value.trim() || 'PLAYER';
             currentPlayerName = name;
 
             await startCountdown();
 
-            // Reset game
             player.x = 150;
             player.y = GROUND_Y;
             player.onFloor = true;
@@ -897,7 +989,7 @@
             if (isNewHighScore && score > 0) {
                 highScoreMessage.innerHTML = `<span class="highscore-badge">${texts[currentLang].newRecord}</span>`;
             } else {
-                highScoreMessage.innerHTML = `<span style="color: #888;">${texts[currentLang].yourBest}${currentHighScore}</span>`;
+                highScoreMessage.innerHTML = `<span style="color: #666;">${texts[currentLang].yourBest}${currentHighScore}</span>`;
             }
 
             gameOverScreen.classList.remove('hidden');
