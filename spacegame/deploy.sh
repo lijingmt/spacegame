@@ -3,7 +3,7 @@
 # 切换到脚本所在目录
 cd "$(dirname "$0")"
 
-echo "🚀 Deploying Space Game..."
+echo "🚀 Deploying Space Game Collection..."
 
 # 创建数据目录
 mkdir -p ./data/leaderboard
@@ -20,8 +20,16 @@ docker build -t spacegame .
 echo "🚀 Starting container..."
 docker run -d --name spacegame \
     -p 23456:80 \
-    -v "$(pwd)/data/leaderboard:/data" \
+    -v "$(pwd)/data/leaderboard:/data/leaderboard" \
     spacegame
 
 echo "✅ Done! Access at http://192.168.1.203:23456/"
-echo "📁 Leaderboard data stored in: $(pwd)/data/leaderboard/"
+echo "📁 Game data stored in: $(pwd)/data/leaderboard/"
+echo ""
+echo "📮 Available games:"
+for dir in games/*/; do
+    if [ -d "$dir" ]; then
+        game_name=$(basename "$dir")
+        echo "   - /games/$game_name"
+    fi
+done

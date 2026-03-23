@@ -8,9 +8,11 @@ RUN npm install --production
 # 复制服务器代码
 COPY server.js .
 
-# 创建 public 目录并复制游戏文件
-RUN mkdir -p public
-COPY index.html public/
+# 复制主页
+COPY index.html .
+
+# 复制游戏目录
+COPY games/ ./games/
 
 # 创建数据目录
 RUN mkdir -p /data

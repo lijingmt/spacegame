@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Template - Space Game Collection</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #0a0a2a, #1a1a4a);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 1000px;
+            height: 600px;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: 4px solid #4a4a8a;
+            border-radius: 4px;
+            box-shadow: 0 0 30px rgba(100, 100, 255, 0.3);
+        }
+
+        #homeBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: rgba(255, 170, 0, 0.2);
+            border: 2px solid rgba(255, 170, 0, 0.4);
+            border-radius: 20px;
+            color: #ffaa00;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        #homeBtn:hover {
+            background: rgba(255, 170, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        #startScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 48px;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: linear-gradient(to bottom, #4a9eff, #2060cc);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+        <a href="/" id="homeBtn">🏠 HOME</a>
+
+        <div id="startScreen">
+            <h1>YOUR GAME TITLE</h1>
+            <p>Start building your game here!</p>
+            <button class="btn" onclick="startGame()">START GAME</button>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // GAME CONFIGURATION - CHANGE THIS WHEN COPYING TO A NEW GAME
+        // ============================================================
+        const GAME_ID = 'your-game-id';  // ← Change this to match your folder name
+
+        // ============================================================
+        // GAME VARIABLES
+        // ============================================================
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('startScreen');
+
+        let gameRunning = false;
+        let score = 0;
+        let animationId;
+
+        // ============================================================
+        // GAME LOOP
+        // ============================================================
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // TODO: Add your game logic here
+            // - Draw game objects
+            // - Update game state
+            // - Check collisions
+            // - etc.
+
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // ============================================================
+        // GAME STATE FUNCTIONS
+        // ============================================================
+        function startGame() {
+            startScreen.classList.add('hidden');
+            gameRunning = true;
+            gameLoop();
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            startScreen.classList.remove('hidden');
+            alert('Game Over! Score: ' + score);
+        }
+
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        function backToCollection() {
+            window.location.href = '../';
+        }
+
+        // ============================================================
+        // INPUT HANDLERS
+        // ============================================================
+        canvas.addEventListener('click', () => {
+            // TODO: Add your input handling here
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (!gameRunning) {
+                    startGame();
+                }
+            }
+        });
+
+        // Initial render
+        ctx.fillStyle = '#1a1a4a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#00ffff';
+        ctx.font = '30px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Press START GAME or SPACE to begin', canvas.width / 2, canvas.height / 2);
+    </script>
+</body>
+</html>

@@ -4,24 +4,45 @@ const path = require('path');
 
 const app = express();
 const PORT = 80;
-const DATA_FILE = '/data/leaderboard.json';
+const DATA_DIR = '/data/leaderboard';
 
 // 静态文件服务
 app.use(express.static('public'));
 app.use(express.json());
 
-// 确保数据文件存在
-function ensureDataFile() {
-    if (!fs.existsSync(DATA_FILE)) {
-        fs.writeFileSync(DATA_FILE, JSON.stringify([]));
+// 确保数据目录存在
+function ensureDataDir() {
+    if (!fs.existsSync(DATA_DIR)) {
+        fs.mkdirSync(DATA_DIR, { recursive: true });
     }
 }
 
-// 获取排行榜
-app.get('/api/leaderboard', (req, res) => {
+// 获取游戏的数据文件路径
+function getGameDataFile(gameId) {
+    return path.join(DATA_DIR, `${gameId}.json`);
+}
+
+// 确保游戏数据文件存在
+function ensureGameDataFile(gameId) {
+    ensureDataDir();
+    const dataFile = getGameDataFile(gameId);
+    if (!fs.existsSync(dataFile)) {
+        fs.writeFileSync(dataFile, JSON.stringify([]));
+    }
+    return dataFile;
+}
+
+// 获取特定游戏的排行榜
+app.get('/api/leaderboard/:gameId', (req, res) => {
     try {
-        ensureDataFile();
-        const data = fs.readFileSync(DATA_FILE, 'utf8');
+        const gameId = req.params.gameId;
+        // 验证游戏ID，只允许字母数字和连字符
+        if (!/^[a-z0-9-]+$/.test(gameId)) {
+            return res.status(400).json({ error: 'Invalid game ID' });
+        }
+
+        const dataFile = ensureGameDataFile(gameId);
+        const data = fs.readFileSync(dataFile, 'utf8');
         res.json(JSON.parse(data));
     } catch (error) {
         console.error('Error reading leaderboard:', error);
@@ -29,11 +50,17 @@ app.get('/api/leaderboard', (req, res) => {
     }
 });
 
-// 更新排行榜
-app.post('/api/leaderboard', (req, res) => {
+// 更新特定游戏的排行榜
+app.post('/api/leaderboard/:gameId', (req, res) => {
     try {
-        ensureDataFile();
-        let leaderboard = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        const gameId = req.params.gameId;
+        // 验证游戏ID
+        if (!/^[a-z0-9-]+$/.test(gameId)) {
+            return res.status(400).json({ error: 'Invalid game ID' });
+        }
+
+        const dataFile = ensureGameDataFile(gameId);
+        let leaderboard = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
 
         const { name, score } = req.body;
 
@@ -62,7 +89,7 @@ app.post('/api/leaderboard', (req, res) => {
         leaderboard = leaderboard.slice(0, 50);
 
         // 保存到文件
-        fs.writeFileSync(DATA_FILE, JSON.stringify(leaderboard, null, 2));
+        fs.writeFileSync(dataFile, JSON.stringify(leaderboard, null, 2));
 
         res.json({ success: true, leaderboard });
     } catch (error) {
@@ -71,11 +98,17 @@ app.post('/api/leaderboard', (req, res) => {
     }
 });
 
-// 获取玩家最高分
-app.get('/api/highscore/:name', (req, res) => {
+// 获取特定游戏的玩家最高分
+app.get('/api/highscore/:gameId/:name', (req, res) => {
     try {
-        ensureDataFile();
-        const leaderboard = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        const gameId = req.params.gameId;
+        // 验证游戏ID
+        if (!/^[a-z0-9-]+$/.test(gameId)) {
+            return res.status(400).json({ error: 'Invalid game ID' });
+        }
+
+        const dataFile = ensureGameDataFile(gameId);
+        const leaderboard = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
         const player = leaderboard.find(entry => entry.name === req.params.name);
         res.json({ score: player ? player.score : 0 });
     } catch (error) {
@@ -89,7 +122,15 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
+// Serve static files from games directory
+app.use('/games', express.static('games'));
+
+// 主页重定向到游戏合集
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 app.listen(PORT, () => {
-    console.log(`Space Game server running on port ${PORT}`);
-    console.log(`Data file: ${DATA_FILE}`);
+    console.log(`Space Game Collection server running on port ${PORT}`);
+    console.log(`Data directory: ${DATA_DIR}`);
 });

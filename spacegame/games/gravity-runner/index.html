@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gravity Runner - Pixel Edition</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to bottom, #0a0a2a, #1a1a4a);
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 1000px;
+            height: 600px;
+        }
+
+        #gameCanvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            border: 4px solid #4a4a8a;
+            border-radius: 4px;
+            box-shadow: 0 0 30px rgba(100, 100, 255, 0.3);
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        #score {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            z-index: 10;
+            font-family: Arial, sans-serif;
+        }
+
+        #langBtn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+            font-family: Arial, sans-serif;
+        }
+
+        #langBtn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        #homeBtn {
+            position: absolute;
+            top: 20px;
+            right: 110px;
+            padding: 8px 16px;
+            font-size: 14px;
+            background: rgba(255, 170, 0, 0.2);
+            border: 2px solid rgba(255, 170, 0, 0.4);
+            border-radius: 20px;
+            color: #ffaa00;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 100;
+            font-family: Arial, sans-serif;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        #homeBtn:hover {
+            background: rgba(255, 170, 0, 0.3);
+            transform: scale(1.05);
+        }
+
+        #startScreen, #gameOverScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.85);
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            overflow-y: auto;
+            padding-top: 30px;
+            padding-bottom: 30px;
+        }
+
+        #startScreen h1, #gameOverScreen h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #00ffff;
+            text-shadow: 0 0 20px #00ffff;
+            font-family: Arial, sans-serif;
+        }
+
+        #startScreen p, #gameOverScreen p {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #aaa;
+            font-family: Arial, sans-serif;
+        }
+
+        .btn {
+            padding: 15px 40px;
+            font-size: 20px;
+            background: linear-gradient(to bottom, #4a9eff, #2060cc);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px;
+            font-family: Arial, sans-serif;
+            box-shadow: 0 5px 15px rgba(74, 158, 255, 0.4);
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(74, 158, 255, 0.6);
+        }
+
+        #finalScore {
+            font-size: 32px;
+            color: #ffff00;
+            margin: 20px 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        #nameInputContainer {
+            margin: 20px 0;
+        }
+
+        #playerName {
+            padding: 12px 20px;
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            color: white;
+            text-align: center;
+            width: 200px;
+            outline: none;
+            font-family: Arial, sans-serif;
+        }
+
+        #playerName:focus {
+            border-color: #00ffff;
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+        }
+
+        #playerName::placeholder {
+            color: #888;
+        }
+
+        #leaderboard {
+            margin-top: 20px;
+            padding: 20px 30px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 400px;
+        }
+
+        #leaderboard h3 {
+            color: #ffaa00;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+        }
+
+        .leaderboard-item:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-rank {
+            width: 30px;
+            color: #888;
+            font-weight: bold;
+        }
+
+        .leaderboard-rank.top1 { color: #ffff00; }
+        .leaderboard-rank.top2 { color: #aaaaaa; }
+        .leaderboard-rank.top3 { color: #ff8800; }
+
+        .leaderboard-name {
+            flex: 1;
+            text-align: left;
+            color: #00ff00;
+            padding-left: 10px;
+        }
+
+        .leaderboard-score {
+            color: #00ffff;
+            font-weight: bold;
+        }
+
+        .highscore-badge {
+            display: inline-block;
+            background: linear-gradient(to bottom, #ffd700, #ff8c00);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .leaderboard-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .page-btn {
+            padding: 5px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: Arial, sans-serif;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .page-info {
+            color: #aaa;
+            font-size: 14px;
+            font-family: Arial, sans-serif;
+        }
+
+        #leaderboard::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        #leaderboard::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+        }
+
+        #leaderboard::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 6px;
+        }
+
+        #leaderboard::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.6);
+        }
+
+        #countdown {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 120px;
+            color: #00ffff;
+            text-shadow: 0 0 30px #00ffff, 0 0 60px #00ffff;
+            animation: pulse 0.5s ease-in-out;
+            z-index: 50;
+            font-family: Arial, sans-serif;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 25px;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: left;
+        }
+
+        .instructions p {
+            margin: 5px 0;
+            color: #88ff88 !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="1000" height="600"></canvas>
+        <a href="/" id="homeBtn" data-zh="🏠 首页" data-en="🏠 HOME">🏠 HOME</a>
+        <button id="langBtn" onclick="toggleLanguage()">中文</button>
+        <div id="score">SCORE: 0</div>
+        <div id="countdown" class="hidden"></div>
+
+        <div id="startScreen">
+            <h1>▶ GRAVITY RUNNER ◀</h1>
+            <div class="instructions">
+                <p data-zh="🎮 玩法说明:" data-en="🎮 HOW TO PLAY:">🎮 HOW TO PLAY:</p>
+                <p data-zh="▶ Player runs on the FLOOR" data-en="▶ Player runs on the FLOOR">▶ Player runs on the FLOOR</p>
+                <p data-zh="▶ CLICK to flip to CEILING" data-en="▶ CLICK to flip to CEILING">▶ CLICK to flip to CEILING</p>
+                <p data-zh="▶ Avoid SPIKES on your surface!" data-en="▶ Avoid SPIKES on your surface!">▶ Avoid SPIKES on your surface!</p>
+                <p data-zh="▶ CLICK again to return!" data-en="▶ CLICK again to return!">▶ CLICK again to return!</p>
+            </div>
+
+            <div id="nameInputContainer">
+                <input type="text" id="playerName" maxlength="10" placeholder="ENTER NAME" data-zh-placeholder="输入你的名字">
+            </div>
+
+            <button class="btn" onclick="startGame()" data-zh="开始游戏" data-en="START GAME">START GAME</button>
+
+            <div id="leaderboard">
+                <h3 data-zh="🏆 排行榜" data-en="🏆 HIGH SCORES">🏆 HIGH SCORES</h3>
+                <div id="leaderboardList"></div>
+                <div class="leaderboard-pagination">
+                    <button class="page-btn" id="prevPageBtn" onclick="prevPage()">◀</button>
+                    <span class="page-info" id="pageInfo">1 / 1</span>
+                    <button class="page-btn" id="nextPageBtn" onclick="nextPage()">▶</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameOverScreen" class="hidden">
+            <h1 data-zh="💥 GAME OVER" data-en="💥 GAME OVER">💥 GAME OVER</h1>
+            <div id="finalScore">SCORE: 0</div>
+            <div id="highScoreMessage"></div>
+            <button class="btn" onclick="backToCollection()" data-zh="游戏列表" data-en="GAME LIST">GAME LIST</button>
+            <button class="btn" onclick="backToMenu()" data-zh="返回菜单" data-en="MENU">MENU</button>
+            <button class="btn" onclick="restartGame()" data-zh="再来一次" data-en="RETRY">RETRY</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreElement = document.getElementById('finalScore');
+        const langBtn = document.getElementById('langBtn');
+        const playerNameInput = document.getElementById('playerName');
+        const leaderboardList = document.getElementById('leaderboardList');
+        const highScoreMessage = document.getElementById('highScoreMessage');
+        const countdownElement = document.getElementById('countdown');
+
+        // Game state
+        let gameRunning = false;
+        let score = 0;
+        let animationId;
+
+        // Leaderboard
+        let currentPlayerName = '';
+        let isNewHighScore = false;
+        let cachedLeaderboard = [];
+        let cachedHighScores = {};
+        let currentPage = 1;
+        const itemsPerPage = 10;
+
+        // Game ID for API routing - change this when copying to a new game
+        const GAME_ID = 'gravity-runner';
+        const API_BASE = '/api';
+
+        // ============ PIXEL SIZE ============
+        const PIXEL = 6; // Size of each "pixel" in the pixel art
+
+        // ============ LEADERBOARD FUNCTIONS ============
+        async function getLeaderboard() {
+            try {
+                const response = await fetch(`${API_BASE}/leaderboard/${GAME_ID}`);
+                const data = await response.json();
+                cachedLeaderboard = Array.isArray(data) ? data : [];
+                return cachedLeaderboard;
+            } catch (error) {
+                console.error('Error fetching leaderboard:', error);
+                return cachedLeaderboard;
+            }
+        }
+
+        async function updateLeaderboard(name, score) {
+            try {
+                const response = await fetch(`${API_BASE}/leaderboard/${GAME_ID}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, score })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    cachedLeaderboard = result.leaderboard;
+                    return result.leaderboard;
+                }
+            } catch (error) {
+                console.error('Error updating leaderboard:', error);
+            }
+            return cachedLeaderboard;
+        }
+
+        async function getPlayerHighScore(name) {
+            if (cachedHighScores[name] !== undefined) {
+                return cachedHighScores[name];
+            }
+            try {
+                const response = await fetch(`${API_BASE}/highscore/${GAME_ID}/${encodeURIComponent(name)}`);
+                const data = await response.json();
+                cachedHighScores[name] = data.score;
+                return data.score;
+            } catch (error) {
+                return 0;
+            }
+        }
+
+        async function checkHighScore(name, score) {
+            const highScore = await getPlayerHighScore(name);
+            return score > highScore;
+        }
+
+        async function renderLeaderboard() {
+            const leaderboard = await getLeaderboard();
+
+            if (leaderboard.length === 0) {
+                leaderboardList.innerHTML = `<p style="color: #666; font-size: 12px;" data-zh="暂无记录" data-en="NO RECORDS YET">NO RECORDS YET</p>`;
+                updatePagination(0);
+                return;
+            }
+
+            const totalPages = Math.ceil(leaderboard.length / itemsPerPage);
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, leaderboard.length);
+            const currentPageData = leaderboard.slice(startIndex, endIndex);
+
+            let html = '';
+            currentPageData.forEach((entry, index) => {
+                const globalIndex = startIndex + index;
+                const rankClass = globalIndex === 0 ? 'top1' : globalIndex === 1 ? 'top2' : globalIndex === 2 ? 'top3' : '';
+                html += `
+                    <div class="leaderboard-item">
+                        <span class="leaderboard-rank ${rankClass}">${globalIndex + 1}.</span>
+                        <span class="leaderboard-name">${entry.name}</span>
+                        <span class="leaderboard-score">${entry.score}</span>
+                    </div>
+                `;
+            });
+
+            leaderboardList.innerHTML = html;
+            updatePagination(totalPages);
+        }
+
+        function updatePagination(totalPages) {
+            const pageInfo = document.getElementById('pageInfo');
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+
+            if (totalPages === 0) {
+                pageInfo.textContent = '0 / 0';
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+            } else {
+                pageInfo.textContent = `${currentPage} / ${totalPages}`;
+                prevBtn.disabled = currentPage === 1;
+                nextBtn.disabled = currentPage === totalPages;
+            }
+        }
+
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderLeaderboard();
+            }
+        }
+
+        function nextPage() {
+            const totalPages = Math.ceil(cachedLeaderboard.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderLeaderboard();
+            }
+        }
+
+        // ============ LANGUAGE ============
+        let currentLang = 'en';
+        const texts = {
+            en: {
+                score: 'SCORE',
+                finalScore: 'SCORE',
+                newRecord: '🎉 NEW RECORD!',
+                yourBest: 'BEST: '
+            },
+            zh: {
+                score: '分数',
+                finalScore: '分数',
+                newRecord: '🎉 新纪录!',
+                yourBest: '最高分: '
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            langBtn.textContent = currentLang === 'en' ? '中文' : 'ENGLISH';
+
+            document.querySelectorAll('[data-zh]').forEach(el => {
+                el.textContent = el.getAttribute(`data-${currentLang}`);
+            });
+
+            const nameInput = document.getElementById('playerName');
+            nameInput.placeholder = currentLang === 'en' ? 'ENTER NAME' : '输入你的名字';
+
+            updateScoreDisplay();
+            renderLeaderboard();
+        }
+
+        function updateScoreDisplay() {
+            const label = texts[currentLang].score;
+            scoreElement.innerHTML = `${label}: ${score}`;
+            finalScoreElement.textContent = `${texts[currentLang].finalScore}: ${score}`;
+        }
+
+        async function startCountdown() {
+            countdownElement.classList.remove('hidden');
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+
+            const countdowns = ['3', '2', '1', 'GO!'];
+
+            for (let i = 0; i < countdowns.length; i++) {
+                countdownElement.textContent = countdowns[i];
+                countdownElement.style.animation = 'none';
+                countdownElement.offsetHeight;
+                countdownElement.style.animation = 'pulse 0.5s ease-in-out';
+                await new Promise(resolve => setTimeout(resolve, 800));
+            }
+
+            countdownElement.classList.add('hidden');
+        }
+
+        // ============ GAME VARIABLES ============
+        const GROUND_Y = 500;
+        const CEILING_Y = 75;
+        const PLAYER_SIZE = 42;
+
+        let player = {
+            x: 150,
+            y: GROUND_Y,
+            onFloor: true,
+            flipping: false,
+            flipProgress: 0,
+            runFrame: 0
+        };
+
+        let obstacles = [];
+        let obstacleSpeed = 4;
+        let obstacleSpawnTimer = 0;
+        let obstacleSpawnInterval = 100;
+
+        // Background stars (now pixel stars!)
+        let stars = [];
+        for (let i = 0; i < 50; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: PIXEL,
+                speed: Math.random() * 1.5 + 0.5,
+                brightness: Math.random() * 0.5 + 0.5
+            });
+        }
+
+        // ============ PIXEL DRAWING HELPER ============
+        function drawPixelRect(x, y, w, h, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(
+                Math.floor(x / PIXEL) * PIXEL,
+                Math.floor(y / PIXEL) * PIXEL,
+                Math.ceil(w / PIXEL) * PIXEL,
+                Math.ceil(h / PIXEL) * PIXEL
+            );
+        }
+
+        function drawPixel(x, y, color) {
+            ctx.fillStyle = color;
+            ctx.fillRect(Math.floor(x / PIXEL) * PIXEL, Math.floor(y / PIXEL) * PIXEL, PIXEL, PIXEL);
+        }
+
+        // ============ DRAWING FUNCTIONS ============
+        function drawBackground() {
+            // Pixelated sky gradient (in bands)
+            const colors = ['#0a0520', '#0d0625', '#100830', '#130a35', '#100830', '#0d0625', '#0a0520'];
+            const bandHeight = Math.ceil(canvas.height / colors.length / PIXEL) * PIXEL;
+
+            for (let i = 0; i < colors.length; i++) {
+                drawPixelRect(0, i * bandHeight, canvas.width, bandHeight, colors[i]);
+            }
+
+            // Pixel stars (squares!) - no flickering!
+            stars.forEach(star => {
+                ctx.globalAlpha = star.brightness;
+                const px = Math.floor(star.x / PIXEL) * PIXEL;
+                const py = Math.floor(star.y / PIXEL) * PIXEL;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(px, py, star.size, star.size);
+            });
+            ctx.globalAlpha = 1;
+        }
+
+        function updateStars() {
+            stars.forEach(star => {
+                star.x -= star.speed;
+                if (star.x < 0) {
+                    star.x = canvas.width;
+                    star.y = Math.random() * canvas.height;
+                }
+            });
+        }
+
+        function drawFloor() {
+            // Main floor area - pixelated
+            const floorY = GROUND_Y + PLAYER_SIZE;
+            const floorHeight = canvas.height - floorY;
+
+            // Base floor color
+            drawPixelRect(0, floorY, canvas.width, floorHeight, '#3a3a5a');
+
+            // Pixel pattern on floor
+            ctx.fillStyle = '#4a4a7a';
+            for (let i = 0; i < canvas.width; i += PIXEL * 3) {
+                ctx.fillRect(i, floorY + PIXEL * 2, PIXEL * 2, PIXEL);
+            }
+
+            // Floor line (bright edge)
+            drawPixelRect(0, floorY - PIXEL, canvas.width, PIXEL, '#6a6aaa');
+
+            // Dark pixels near edge for depth
+            ctx.fillStyle = '#2a2a4a';
+            for (let i = 0; i < canvas.width; i += PIXEL * 2) {
+                ctx.fillRect(i, floorY + PIXEL, PIXEL, PIXEL);
+            }
+        }
+
+        function drawCeiling() {
+            // Main ceiling area
+            const ceilHeight = CEILING_Y;
+
+            // Base ceiling color
+            drawPixelRect(0, 0, canvas.width, ceilHeight, '#2a2a4a');
+
+            // Pixel pattern on ceiling
+            ctx.fillStyle = '#3a3a5a';
+            for (let i = 0; i < canvas.width; i += PIXEL * 3) {
+                ctx.fillRect(i, CEILING_Y - PIXEL * 3, PIXEL * 2, PIXEL);
+            }
+
+            // Ceiling line (bright edge)
+            drawPixelRect(0, CEILING_Y, canvas.width, PIXEL, '#6a6aaa');
+
+            // Dark pixels near edge
+            ctx.fillStyle = '#1a1a2a';
+            for (let i = 0; i < canvas.width; i += PIXEL * 2) {
+                ctx.fillRect(i, CEILING_Y - PIXEL * 2, PIXEL, PIXEL);
+            }
+        }
+
+        // Pixel art player sprite (running character)
+        // 0 = transparent, 1 = outline, 2 = main color, 3 = highlight
+        const playerSprite = [
+            [0,0,0,1,1,1,1,0,0],
+            [0,0,1,2,2,2,2,1,0],
+            [0,1,2,3,3,2,2,1,0],
+            [0,1,2,2,2,2,2,1,0],
+            [0,1,1,2,2,1,1,0,0],
+            [1,2,2,2,2,2,2,2,1],
+            [1,2,2,1,1,2,2,2,1],
+            [0,1,1,0,0,1,1,0,0]
+        ];
+
+        const playerLegs1 = [
+            [0,0,0,0,1,0,0,0,0],
+            [0,0,0,1,2,1,0,0,0],
+            [0,0,1,2,2,2,1,0,0],
+            [0,1,2,2,2,2,2,1,0]
+        ];
+
+        const playerLegs2 = [
+            [0,0,0,0,0,1,0,0,0],
+            [0,0,0,0,1,2,1,0,0],
+            [0,0,0,1,2,2,2,1,0],
+            [0,0,1,2,2,2,2,1,0]
+        ];
+
+        function drawPlayer() {
+            ctx.save();
+
+            let drawX = player.x;
+            let drawY = player.y;
+            let rotation = 0;
+
+            if (player.flipping) {
+                const startY = player.onFloor ? GROUND_Y : CEILING_Y;
+                const endY = player.onFloor ? CEILING_Y : GROUND_Y;
+                drawY = startY + (endY - startY) * player.flipProgress;
+                rotation = player.onFloor ? player.flipProgress * Math.PI : Math.PI + player.flipProgress * Math.PI;
+            } else {
+                rotation = player.onFloor ? 0 : Math.PI;
+            }
+
+            ctx.translate(drawX + PLAYER_SIZE / 2, drawY + PLAYER_SIZE / 2);
+            ctx.rotate(rotation);
+
+            // Draw pixel art player
+            const pixelScale = PIXEL;
+            const offsetX = -playerSprite[0].length * pixelScale / 2;
+            const offsetY = -playerSprite.length * pixelScale / 2;
+
+            // Body
+            for (let row = 0; row < playerSprite.length; row++) {
+                for (let col = 0; col < playerSprite[row].length; col++) {
+                    const pixel = playerSprite[row][col];
+                    if (pixel !== 0) {
+                        let color = '#00ffff'; // Bright cyan
+                        if (pixel === 1) color = '#00aaaa'; // Darker cyan outline
+                        else if (pixel === 3) color = '#aaffff'; // Light cyan highlight
+                        ctx.fillStyle = color;
+                        ctx.fillRect(
+                            offsetX + col * pixelScale,
+                            offsetY + row * pixelScale,
+                            pixelScale,
+                            pixelScale
+                        );
+                    }
+                }
+            }
+
+            // Legs (animated)
+            const legFrame = Math.floor(player.runFrame / 5) % 2;
+            const legs = legFrame === 0 ? playerLegs1 : playerLegs2;
+            const legOffsetY = playerSprite.length * pixelScale;
+
+            for (let row = 0; row < legs.length; row++) {
+                for (let col = 0; col < legs[row].length; col++) {
+                    const pixel = legs[row][col];
+                    if (pixel !== 0) {
+                        let color = '#00ffff'; // Bright cyan
+                        if (pixel === 1) color = '#00aaaa'; // Darker cyan outline
+                        else if (pixel === 3) color = '#aaffff'; // Light cyan highlight
+                        ctx.fillStyle = color;
+                        ctx.fillRect(
+                            offsetX + col * pixelScale,
+                            legOffsetY + row * pixelScale,
+                            pixelScale,
+                            pixelScale
+                        );
+                    }
+                }
+            }
+
+            ctx.restore();
+        }
+
+        // Pixel art spike sprites
+        // Single spike pointing up
+        const spikeUpSprite = [
+            [0,0,0,0,1,0,0,0,0],
+            [0,0,0,1,2,1,0,0,0],
+            [0,0,1,2,2,2,1,0,0],
+            [0,1,2,2,2,2,2,1,0],
+            [0,1,1,2,2,2,1,1,0],
+            [0,0,1,1,1,1,1,0,0],
+            [0,0,0,1,1,1,0,0,0]
+        ];
+
+        // Single spike pointing down
+        const spikeDownSprite = [
+            [0,0,0,1,1,1,0,0,0],
+            [0,0,1,1,1,1,1,0,0],
+            [0,1,1,2,2,2,1,1,0],
+            [0,1,2,2,2,2,2,1,0],
+            [0,0,1,2,2,2,1,0,0],
+            [0,0,0,1,2,1,0,0,0],
+            [0,0,0,0,1,0,0,0,0]
+        ];
+
+        function drawPixelSpike(x, y, width, pointingUp) {
+            const spikeWidth = spikeUpSprite[0].length * PIXEL;
+            const numSpikes = Math.floor(width / spikeWidth);
+
+            for (let s = 0; s < numSpikes; s++) {
+                const sprite = pointingUp ? spikeUpSprite : spikeDownSprite;
+                const baseX = x + s * spikeWidth;
+                const baseY = pointingUp ? y - sprite.length * PIXEL : y;
+
+                for (let row = 0; row < sprite.length; row++) {
+                    for (let col = 0; col < sprite[row].length; col++) {
+                        const pixel = sprite[row][col];
+                        if (pixel !== 0) {
+                            let color = '#ff0000'; // Bright red
+                            if (pixel === 1) color = '#aa0000'; // Dark red outline
+                            else if (pixel === 2) color = '#ff4444'; // Light red
+
+                            ctx.fillStyle = color;
+                            ctx.fillRect(
+                                baseX + col * PIXEL,
+                                baseY + row * PIXEL,
+                                PIXEL,
+                                PIXEL
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        function drawObstacles() {
+            obstacles.forEach(obs => {
+                if (obs.onFloor) {
+                    drawPixelSpike(obs.x, GROUND_Y + PLAYER_SIZE, obs.width, true);
+                } else {
+                    drawPixelSpike(obs.x, CEILING_Y, obs.width, false);
+                }
+            });
+        }
+
+        // ============ GAME LOGIC ============
+        function flipGravity() {
+            if (!player.flipping && gameRunning) {
+                player.flipping = true;
+                player.flipProgress = 0;
+            }
+        }
+
+        function updatePlayer() {
+            player.runFrame++;
+
+            if (player.flipping) {
+                player.flipProgress += 0.08;
+                if (player.flipProgress >= 1) {
+                    player.flipProgress = 0;
+                    player.flipping = false;
+                    player.onFloor = !player.onFloor;
+                    player.y = player.onFloor ? GROUND_Y : CEILING_Y;
+                }
+            }
+        }
+
+        function spawnObstacle() {
+            const minWidth = 50;
+            const maxWidth = 150;
+
+            const onFloor = Math.random() < 0.5;
+
+            obstacles.push({
+                x: canvas.width,
+                y: onFloor ? GROUND_Y + PLAYER_SIZE : CEILING_Y,
+                width: minWidth + Math.random() * (maxWidth - minWidth),
+                height: spikeUpSprite.length * PIXEL,
+                onFloor: onFloor,
+                passed: false
+            });
+        }
+
+        function updateObstacles() {
+            obstacleSpawnTimer++;
+            if (obstacleSpawnTimer >= obstacleSpawnInterval) {
+                spawnObstacle();
+                obstacleSpawnTimer = 0;
+            }
+
+            obstacles.forEach((obs, index) => {
+                obs.x -= obstacleSpeed;
+
+                if (obs.x + obs.width < 0) {
+                    obstacles.splice(index, 1);
+                    score += 10;
+                    updateScoreDisplay();
+                }
+            });
+
+            if (score > 0 && score % 100 === 0) {
+                obstacleSpeed = Math.min(8, 4 + score / 500);
+            }
+        }
+
+        function checkCollision() {
+            const playerLeft = player.x + 8;
+            const playerRight = player.x + PLAYER_SIZE - 8;
+            const playerCenterX = player.x + PLAYER_SIZE / 2;
+
+            for (let obs of obstacles) {
+                // Check horizontal overlap - player must be horizontally aligned with spike
+                if (playerCenterX > obs.x && playerCenterX < obs.x + obs.width) {
+                    // Check if player is on the same surface as the spike
+                    const playerOnFloorNow = player.onFloor && !player.flipping;
+                    const playerOnCeilingNow = !player.onFloor && !player.flipping;
+                    const playerFlippingToFloor = player.flipping && !player.onFloor && player.flipProgress >= 0.5;
+                    const playerFlippingToCeiling = player.flipping && player.onFloor && player.flipProgress >= 0.5;
+
+                    const effectivelyOnFloor = playerOnFloorNow || playerFlippingToFloor;
+                    const effectivelyOnCeiling = playerOnCeilingNow || playerFlippingToCeiling;
+
+                    if (obs.onFloor && effectivelyOnFloor) {
+                        return true; // Spike on floor, player on floor = DEAD
+                    }
+                    if (!obs.onFloor && effectivelyOnCeiling) {
+                        return true; // Spike on ceiling, player on ceiling = DEAD
+                    }
+                }
+            }
+            return false;
+        }
+
+        function gameLoop() {
+            if (!gameRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawBackground();
+            drawCeiling();
+            drawFloor();
+            updateStars();
+            drawObstacles();
+            updateObstacles();
+            updatePlayer();
+            drawPlayer();
+
+            if (checkCollision()) {
+                gameOver();
+                return;
+            }
+
+            score++;
+            if (score % 10 === 0) {
+                updateScoreDisplay();
+            }
+
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        // ============ GAME STATE FUNCTIONS ============
+        async function startGame() {
+            const name = playerNameInput.value.trim() || 'PLAYER';
+            currentPlayerName = name;
+
+            await startCountdown();
+
+            player.x = 150;
+            player.y = GROUND_Y;
+            player.onFloor = true;
+            player.flipping = false;
+            player.flipProgress = 0;
+            player.runFrame = 0;
+
+            obstacles = [];
+            score = 0;
+            obstacleSpeed = 4;
+            obstacleSpawnTimer = 0;
+            updateScoreDisplay();
+
+            gameRunning = true;
+            gameLoop();
+        }
+
+        async function gameOver() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+
+            const currentHighScore = await getPlayerHighScore(currentPlayerName);
+            isNewHighScore = score > currentHighScore;
+
+            await updateLeaderboard(currentPlayerName, score);
+            cachedHighScores[currentPlayerName] = score;
+
+            finalScoreElement.textContent = `${texts[currentLang].finalScore}: ${score}`;
+
+            if (isNewHighScore && score > 0) {
+                highScoreMessage.innerHTML = `<span class="highscore-badge">${texts[currentLang].newRecord}</span>`;
+            } else {
+                highScoreMessage.innerHTML = `<span style="color: #666;">${texts[currentLang].yourBest}${currentHighScore}</span>`;
+            }
+
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        async function restartGame() {
+            gameOverScreen.classList.add('hidden');
+            await startCountdown();
+
+            player.x = 150;
+            player.y = GROUND_Y;
+            player.onFloor = true;
+            player.flipping = false;
+            player.flipProgress = 0;
+            player.runFrame = 0;
+
+            obstacles = [];
+            score = 0;
+            obstacleSpeed = 4;
+            obstacleSpawnTimer = 0;
+            updateScoreDisplay();
+
+            gameRunning = true;
+            gameLoop();
+        }
+
+        async function backToMenu() {
+            gameOverScreen.classList.add('hidden');
+            startScreen.classList.remove('hidden');
+            await renderLeaderboard();
+        }
+
+        // Navigate back to the game collection
+        function backToCollection() {
+            window.location.href = '/';
+        }
+
+        // ============ INPUT HANDLERS ============
+        canvas.addEventListener('click', flipGravity);
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            flipGravity();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                if (gameRunning) {
+                    flipGravity();
+                } else if (!startScreen.classList.contains('hidden')) {
+                    startGame();
+                } else if (!gameOverScreen.classList.contains('hidden')) {
+                    restartGame();
+                }
+            }
+        });
+
+        // Initial render
+        drawBackground();
+        drawCeiling();
+        drawFloor();
+        renderLeaderboard();
+    </script>
+</body>
+</html>
