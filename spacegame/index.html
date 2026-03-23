@@ -828,9 +828,14 @@
         function drawObstacles() {
             obstacles.forEach(obs => {
                 if (obs.onFloor) {
+                    // Floor spikes: pointing UP from the floor
+                    // Tips should be at floor level where player runs
                     drawPixelSpike(obs.x, GROUND_Y + PLAYER_SIZE, obs.width, true);
                 } else {
-                    drawPixelSpike(obs.x, CEILING_Y, obs.width, false);
+                    // Ceiling spikes: pointing DOWN from the ceiling
+                    // Tips should be at ceiling level where player runs
+                    // Draw below CEILING_Y so spikes hang down and tips are at the running surface
+                    drawPixelSpike(obs.x, CEILING_Y + spikeUpSprite.length * PIXEL, obs.width, false);
                 }
             });
         }
@@ -863,14 +868,20 @@
 
             const onFloor = Math.random() < 0.5;
 
-            obstacles.push({
+            const obs = {
                 x: canvas.width,
                 y: onFloor ? GROUND_Y + PLAYER_SIZE : CEILING_Y,
                 width: minWidth + Math.random() * (maxWidth - minWidth),
                 height: spikeUpSprite.length * PIXEL,
                 onFloor: onFloor,
                 passed: false
-            });
+            };
+            obstacles.push(obs);
+
+            // Log every 10 spawns to avoid spam
+            if (obstacles.length % 10 === 0) {
+                console.log('[SPAWN] Score:', score, '| New obstacle onFloor:', onFloor, '| Total obstacles:', obstacles.length, '| Speed:', obstacleSpeed);
+            }
         }
 
         function updateObstacles() {
@@ -880,15 +891,16 @@
                 obstacleSpawnTimer = 0;
             }
 
-            obstacles.forEach((obs, index) => {
-                obs.x -= obstacleSpeed;
+            // Use a reverse loop to safely remove obstacles during iteration
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                obstacles[i].x -= obstacleSpeed;
 
-                if (obs.x + obs.width < 0) {
-                    obstacles.splice(index, 1);
+                if (obstacles[i].x + obstacles[i].width < 0) {
+                    obstacles.splice(i, 1);
                     score += 10;
                     updateScoreDisplay();
                 }
-            });
+            }
 
             if (score > 0 && score % 100 === 0) {
                 obstacleSpeed = Math.min(8, 4 + score / 500);
@@ -896,27 +908,33 @@
         }
 
         function checkCollision() {
+            // No collision while flipping - player is in transition between surfaces
+            if (player.flipping) {
+                return false;
+            }
+
             const playerLeft = player.x + 8;
             const playerRight = player.x + PLAYER_SIZE - 8;
             const playerCenterX = player.x + PLAYER_SIZE / 2;
 
+            // Log all obstacles for debugging
+            if (obstacles.length > 0 && score % 500 === 0) {
+                console.log('[DEBUG] Score:', score, 'Obstacles:', obstacles.map(o => ({x: o.x, width: o.width, onFloor: o.onFloor})));
+            }
+
             for (let obs of obstacles) {
                 // Check horizontal overlap - player must be horizontally aligned with spike
                 if (playerCenterX > obs.x && playerCenterX < obs.x + obs.width) {
-                    // Check if player is on the same surface as the spike
-                    const playerOnFloorNow = player.onFloor && !player.flipping;
-                    const playerOnCeilingNow = !player.onFloor && !player.flipping;
-                    const playerFlippingToFloor = player.flipping && !player.onFloor && player.flipProgress >= 0.5;
-                    const playerFlippingToCeiling = player.flipping && player.onFloor && player.flipProgress >= 0.5;
-
-                    const effectivelyOnFloor = playerOnFloorNow || playerFlippingToFloor;
-                    const effectivelyOnCeiling = playerOnCeilingNow || playerFlippingToCeiling;
-
-                    if (obs.onFloor && effectivelyOnFloor) {
-                        return true; // Spike on floor, player on floor = DEAD
+                    // Simple collision: same surface as spike = DEAD
+                    if (obs.onFloor && player.onFloor) {
+                        console.log('[COLLISION] Score:', score, '| Spike on floor, player on floor');
+                        console.log('[COLLISION] obs.x:', obs.x, 'obs.width:', obs.width, 'playerCenterX:', playerCenterX);
+                        return true;
                     }
-                    if (!obs.onFloor && effectivelyOnCeiling) {
-                        return true; // Spike on ceiling, player on ceiling = DEAD
+                    if (!obs.onFloor && !player.onFloor) {
+                        console.log('[COLLISION] Score:', score, '| Spike on ceiling, player on ceiling');
+                        console.log('[COLLISION] obs.x:', obs.x, 'obs.width:', obs.width, 'playerCenterX:', playerCenterX);
+                        return true;
                     }
                 }
             }
