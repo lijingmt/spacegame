@@ -16,9 +16,10 @@ docker rm spacegame 2>/dev/null
 echo "📦 Building Docker image..."
 docker build -t spacegame .
 
-# 启动新容器（挂载数据目录）
+# 启动新容器（挂载数据目录，自动重启）
 echo "🚀 Starting container..."
 docker run -d --name spacegame \
+    --restart=always \
     -p 23456:80 \
     -v "$(pwd)/data/leaderboard:/data/leaderboard" \
     spacegame
