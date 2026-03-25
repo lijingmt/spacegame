@@ -122,6 +122,48 @@ app.get('/api/health', (req, res) => {
     res.json({ status: 'ok' });
 });
 
+// 获取所有游戏的合并排行榜（总榜）
+app.get('/api/leaderboard/global', (req, res) => {
+    try {
+        const gameIds = ['gravity-runner', 'bubble-trouble'];
+        const globalLeaderboard = [];
+
+        // 读取所有游戏的排行榜数据
+        for (const gameId of gameIds) {
+            const dataFile = getGameDataFile(gameId);
+            if (fs.existsSync(dataFile)) {
+                const gameLeaderboard = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
+
+                // 将每个游戏的分数添加到总榜
+                for (const entry of gameLeaderboard) {
+                    const existingEntry = globalLeaderboard.find(e => e.name === entry.name);
+
+                    if (existingEntry) {
+                        // 如果玩家已存在，累加分数
+                        existingEntry.score += entry.score;
+                    } else {
+                        // 新玩家，添加到总榜
+                        globalLeaderboard.push({
+                            name: entry.name,
+                            score: entry.score,
+                            date: entry.date
+                        });
+                    }
+                }
+            }
+        }
+
+        // 按总分排序
+        globalLeaderboard.sort((a, b) => b.score - a.score);
+
+        // 只保留前50名
+        res.json(globalLeaderboard.slice(0, 50));
+    } catch (error) {
+        console.error('Error reading global leaderboard:', error);
+        res.json([]);
+    }
+});
+
 // Serve static files from games directory
 app.use('/games', express.static('games'));
 
