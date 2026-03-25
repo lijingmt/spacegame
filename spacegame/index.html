@@ -51,11 +51,11 @@
 
         header {
             text-align: center;
-            margin-bottom: 60px;
+            margin-bottom: 40px;
         }
 
         h1 {
-            font-size: 56px;
+            font-size: 48px;
             color: #00ffff;
             text-shadow: 0 0 20px #00ffff, 0 0 40px #00ffff, 0 0 60px #0088ff;
             margin-bottom: 10px;
@@ -63,9 +63,152 @@
         }
 
         .subtitle {
-            font-size: 18px;
+            font-size: 16px;
             color: #888;
             letter-spacing: 2px;
+        }
+
+        /* Leaderboard Section */
+        .leaderboard-section {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        .leaderboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .leaderboard-title {
+            font-size: 28px;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .leaderboard-title .trophy {
+            font-size: 32px;
+        }
+
+        .game-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .game-tab {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            color: #aaa;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .game-tab:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(0, 255, 255, 0.3);
+        }
+
+        .game-tab.active {
+            background: linear-gradient(135deg, #4a9eff, #2060cc);
+            border-color: #4a9eff;
+            color: white;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .leaderboard-table th {
+            text-align: left;
+            padding: 12px 16px;
+            color: #888;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .leaderboard-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .leaderboard-table tr:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .rank-cell {
+            font-weight: bold;
+            color: #00ffff;
+            width: 60px;
+        }
+
+        .rank-1 {
+            color: #ffd700;
+            font-size: 18px;
+        }
+
+        .rank-2 {
+            color: #c0c0c0;
+            font-size: 16px;
+        }
+
+        .rank-3 {
+            color: #cd7f32;
+            font-size: 16px;
+        }
+
+        .name-cell {
+            color: #fff;
+        }
+
+        .score-cell {
+            color: #00ffff;
+            font-weight: bold;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #888;
+        }
+
+        .loading::after {
+            content: '...';
+            animation: dots 1.5s infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+
+        .empty-leaderboard {
+            text-align: center;
+            padding: 40px;
+            color: #666;
         }
 
         /* Game grid */
@@ -74,6 +217,14 @@
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 30px;
             margin-top: 40px;
+        }
+
+        .section-title {
+            font-size: 24px;
+            color: #fff;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
         .game-card {
@@ -164,35 +315,6 @@
             transform: scale(1.05);
         }
 
-        /* New game card */
-        .game-card.new-game {
-            border-style: dashed;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 320px;
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .game-card.new-game:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(0, 255, 255, 0.3);
-        }
-
-        .new-game-content {
-            text-align: center;
-            color: #666;
-        }
-
-        .new-game-content .icon {
-            font-size: 64px;
-            margin-bottom: 15px;
-        }
-
-        .new-game-content p {
-            font-size: 16px;
-        }
-
         /* Footer */
         footer {
             text-align: center;
@@ -205,11 +327,29 @@
         /* Responsive */
         @media (max-width: 768px) {
             h1 {
-                font-size: 36px;
+                font-size: 32px;
             }
 
             .games-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .leaderboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .leaderboard-title {
+                font-size: 22px;
+            }
+
+            .game-tabs {
+                width: 100%;
+            }
+
+            .game-tab {
+                flex: 1;
+                text-align: center;
             }
         }
     </style>
@@ -222,6 +362,26 @@
             <h1>INFINITE SPACE GAME</h1>
             <p class="subtitle" data-zh="无限太空游戏" data-en="INFINITE SPACE GAME">INFINITE SPACE GAME</p>
         </header>
+
+        <!-- Leaderboard Section -->
+        <div class="leaderboard-section">
+            <div class="leaderboard-header">
+                <h2 class="leaderboard-title">
+                    <span class="trophy">🏆</span>
+                    <span data-zh="排行榜" data-en="Leaderboard">Leaderboard</span>
+                </h2>
+                <div class="game-tabs" id="gameTabs">
+                    <button class="game-tab active" data-game="global" data-zh="总榜" data-en="All Games">All Games</button>
+                    <button class="game-tab" data-game="gravity-runner" data-zh="重力跑酷" data-en="Gravity Runner">Gravity Runner</button>
+                    <button class="game-tab" data-game="bubble-trouble" data-zh="泡泡麻烦" data-en="Bubble Trouble">Bubble Trouble</button>
+                </div>
+            </div>
+            <div id="leaderboardContent">
+                <div class="loading" data-zh="加载中" data-en="Loading">Loading</div>
+            </div>
+        </div>
+
+        <h2 class="section-title" data-zh="游戏列表" data-en="Games">Games</h2>
 
         <div class="games-grid" id="gamesGrid">
             <!-- Games will be loaded dynamically -->
@@ -250,7 +410,7 @@
         }
         createStars();
 
-        // Games list - this will be loaded from a JSON config or API in the future
+        // Games list
         const games = [
             {
                 id: 'gravity-runner',
@@ -274,35 +434,110 @@
                 icon: '🫧',
                 color: '#ff6b9d'
             },
-            // Add more games here as they are developed
-            // {
-            //     id: 'game2',
-            //     title: 'Game Title',
-            //     titleZh: '游戏标题',
-            //     description: 'Game description...',
-            //     descriptionZh: '游戏描述...',
-            //     genre: 'Genre',
-            //     genreZh: '类型',
-            //     icon: '🎮',
-            //     color: '#ff00ff'
-            // }
         ];
 
         let currentLang = 'en';
+        let currentGameTab = 'global';
 
+        // Leaderboard functions
+        async function fetchLeaderboard(gameId) {
+            try {
+                const response = await fetch(`/api/leaderboard/${gameId}`);
+                if (!response.ok) throw new Error('Failed to fetch');
+                return await response.json();
+            } catch (error) {
+                console.error('Error fetching leaderboard:', error);
+                return [];
+            }
+        }
+
+        function renderLeaderboard(data) {
+            const content = document.getElementById('leaderboardContent');
+
+            if (!data || data.length === 0) {
+                const emptyText = currentLang === 'zh' ? '暂无数据' : 'No data yet';
+                content.innerHTML = `<div class="empty-leaderboard">${emptyText}</div>`;
+                return;
+            }
+
+            let html = '<table class="leaderboard-table"><thead><tr>';
+            html += `<th data-zh="排名" data-en="Rank">#</th>`;
+            html += `<th data-zh="玩家" data-en="Player">Player</th>`;
+            html += `<th style="text-align:right" data-zh="分数" data-en="Score">Score</th>`;
+            html += '</tr></thead><tbody>';
+
+            data.forEach((entry, index) => {
+                const rank = index + 1;
+                const rankClass = rank <= 3 ? `rank-${rank}` : '';
+                html += `<tr>
+                    <td class="rank-cell ${rankClass}">${rank}</td>
+                    <td class="name-cell">${escapeHtml(entry.name)}</td>
+                    <td class="score-cell">${formatScore(entry.score)}</td>
+                </tr>`;
+            });
+
+            html += '</tbody></table>';
+            content.innerHTML = html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function formatScore(score) {
+            if (score >= 1000000) return (score / 1000000).toFixed(1) + 'M';
+            if (score >= 1000) return (score / 1000).toFixed(1) + 'K';
+            return score.toString();
+        }
+
+        async function loadLeaderboard(gameId) {
+            const content = document.getElementById('leaderboardContent');
+            const loadingText = currentLang === 'zh' ? '加载中' : 'Loading';
+            content.innerHTML = `<div class="loading">${loadingText}</div>`;
+
+            const data = await fetchLeaderboard(gameId);
+            renderLeaderboard(data);
+        }
+
+        // Tab switching
+        document.getElementById('gameTabs').addEventListener('click', (e) => {
+            if (e.target.classList.contains('game-tab')) {
+                document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
+                e.target.classList.add('active');
+                currentGameTab = e.target.dataset.game;
+                loadLeaderboard(currentGameTab);
+            }
+        });
+
+        // Language toggle
         function toggleLanguage() {
             currentLang = currentLang === 'en' ? 'zh' : 'en';
             renderGames();
+            updateTabLabels();
             document.querySelectorAll('[data-zh]').forEach(el => {
                 el.textContent = el.getAttribute(`data-${currentLang}`);
             });
+            loadLeaderboard(currentGameTab);
         }
 
+        function updateTabLabels() {
+            document.querySelectorAll('.game-tab').forEach(tab => {
+                const game = tab.dataset.game;
+                let label;
+                if (game === 'global') label = currentLang === 'zh' ? '总榜' : 'All Games';
+                else if (game === 'gravity-runner') label = currentLang === 'zh' ? '重力跑酷' : 'Gravity Runner';
+                else if (game === 'bubble-trouble') label = currentLang === 'zh' ? '泡泡麻烦' : 'Bubble Trouble';
+                tab.textContent = label;
+            });
+        }
+
+        // Games rendering
         function renderGames() {
             const grid = document.getElementById('gamesGrid');
             grid.innerHTML = '';
 
-            // Render existing games
             games.forEach(game => {
                 const title = currentLang === 'zh' && game.titleZh ? game.titleZh : game.title;
                 const description = currentLang === 'zh' && game.descriptionZh ? game.descriptionZh : game.description;
@@ -329,21 +564,11 @@
                 });
                 grid.appendChild(card);
             });
-
-            // Add "new game" placeholder card
-            const newCard = document.createElement('div');
-            newCard.className = 'game-card new-game';
-            const newText = currentLang === 'zh' ? '新游戏即将推出...' : 'New Game Coming Soon...';
-            newCard.innerHTML = `
-                <div class="new-game-content">
-                    <div class="icon">🔮</div>
-                    <p>${newText}</p>
-                </div>
-            `;
-            grid.appendChild(newCard);
         }
 
+        // Initialize
         renderGames();
+        loadLeaderboard('global');
 
         // Keyboard shortcut for language toggle (L key)
         document.addEventListener('keydown', (e) => {
