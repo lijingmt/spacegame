@@ -918,7 +918,9 @@
             });
 
             if (score > 0 && score % 100 === 0) {
-                obstacleSpeed = Math.min(8, 4 + score / 500);
+                obstacleSpeed = Math.min(7, 4 + score / 500);
+                // Scale spawn interval with speed to keep gaps fair
+                obstacleSpawnInterval = Math.max(70, 100 - (obstacleSpeed - 4) * 15);
             }
         }
 

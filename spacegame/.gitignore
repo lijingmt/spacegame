@@ -1,0 +1,29 @@
+# Data directories
+data/
+docker-data/
+
+# Backup directories
+gamebackuplocal/
+../gamebackuplocal/
+
+# External projects
+../docker-data/
+../games/
+../mysql/
+../pike/
+../pixijs/
+../react/
+../tool/
+../wapmud/
+
+# Node modules in subdirectories
+**/node_modules/
+
+# Build outputs
+**/dist/
+**/public/
+**/.assetpack/
+**/static/
+
+# Logs
+*.log
