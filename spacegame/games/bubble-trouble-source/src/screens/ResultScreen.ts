@@ -310,6 +310,7 @@ export class ResultScreen extends Container implements AppScreen {
     private _footer!: Graphics;
     private _playBtn!: PrimaryButton;
     private _backBtn!: IconButton;
+    private _homeBtn!: PrimaryButton;
 
     constructor() {
         super();
@@ -393,6 +394,10 @@ export class ResultScreen extends Container implements AppScreen {
         this._backBtn.x = 50;
         this._backBtn.y = h - 50;
 
+        // Position home button next to back button
+        this._homeBtn.x = 150;
+        this._homeBtn.y = h - 50;
+
         this._resultsPanel.view.x = w * 0.5;
         this._resultsPanel.view.y = h * 0.5 - 85;
     }
@@ -425,6 +430,16 @@ export class ResultScreen extends Container implements AppScreen {
             navigation.goToScreen(TitleScreen);
         });
 
-        this.addChild(this._playBtn, this._backBtn);
+        // Add home button to return to game collection
+        this._homeBtn = new PrimaryButton({
+            text: 'HOME',
+        });
+
+        this._homeBtn.onPress.connect(() => {
+            // Navigate to homepage
+            window.location.href = '/';
+        });
+
+        this.addChild(this._playBtn, this._backBtn, this._homeBtn);
     }
 }
