@@ -5,7 +5,6 @@ import { Container, Rectangle } from 'pixi.js';
 import { leaderboard } from '../leaderboard';
 import { navigation } from '../navigation';
 import { ResultScreen } from '../screens/ResultScreen';
-import { storage } from '../storage';
 import { boardConfig } from './boardConfig';
 import { Stats } from './Stats';
 import { SystemRunner } from './SystemRunner';
@@ -123,7 +122,8 @@ export class Game {
 
         // Submit score to leaderboard
         const score = this.stats.get('score');
-        const playerName = storage.getStorageItem('playerName') || 'Player';
+        // Get player name from localStorage (set by NameInput component)
+        const playerName = localStorage.getItem('playerName')?.trim() || 'Player';
 
         // Submit to API (fire and forget, don't wait)
         leaderboard.submitScore(playerName, score).catch(() => {

@@ -14,6 +14,7 @@ import { PrimaryButton } from '../ui/buttons/PrimaryButton';
 import { PixiLogo } from '../ui/PixiLogo';
 import { Porthole } from '../ui/Porthole';
 import { Title } from '../ui/Title';
+import { NameInput } from '../ui/NameInput';
 import { i18n } from '../utils/i18n';
 import { throttle } from '../utils/throttle';
 import { GameScreen } from './GameScreen';
@@ -39,6 +40,7 @@ export class TitleScreen extends Container implements AppScreen {
     private _forkBtn!: PrimaryButton;
     private _playBtn!: PrimaryButton;
     private _audioBtn!: AudioButton;
+    private _nameInput!: NameInput;
     /** An animated background decor instance */
     private _portholeOne!: Porthole;
     /** An animated background decor instance */
@@ -81,6 +83,10 @@ export class TitleScreen extends Container implements AppScreen {
 
         // Add buttons like the play button and audio button
         this._buildButtons();
+
+        // Add name input
+        this._nameInput = new NameInput();
+        this._midAnimContainer.addChild(this._nameInput);
 
         // Add all parent containers to screen
         this.addChild(this._topAnimContainer, this._midAnimContainer, this._bottomAnimContainer);
@@ -132,6 +138,11 @@ export class TitleScreen extends Container implements AppScreen {
         gsap.to(this._topAnimContainer, endData);
         gsap.to(this._midAnimContainer, endData);
         gsap.to(this._bottomAnimContainer, endData);
+
+        // Show name input after animation completes
+        gsap.delayedCall(0.5, () => {
+            this._nameInput.show();
+        });
     }
 
     /** Called when the screen is being hidden. */
@@ -141,6 +152,9 @@ export class TitleScreen extends Container implements AppScreen {
 
         // Kill tweens of the screen container
         gsap.killTweensOf(this);
+
+        // Hide name input
+        this._nameInput.hide();
 
         // Tween screen into being invisible
         await gsap.to(this, { alpha: 0, duration: 0.2, ease: 'linear' });
@@ -189,6 +203,13 @@ export class TitleScreen extends Container implements AppScreen {
 
         this._portholeTwo.view.x = w - 40;
         this._portholeTwo.view.y = this._title.view.y + this._title.view.height + 10;
+
+        // Position name input below the title
+        this._nameInput.x = w * 0.5;
+        this._nameInput.y = this._title.view.y + this._title.view.height + 50;
+
+        // Update DOM input position
+        this._nameInput.updatePosition();
 
         // Set hit area of hit container to fit screen
         // Leave a little room to prevent interaction bellow the cannon
@@ -290,6 +311,8 @@ export class TitleScreen extends Container implements AppScreen {
         });
 
         this._playBtn.onPress.connect(() => {
+            // Save player name before starting game
+            this._nameInput.save();
             // Go to game screen when user presses play button
             navigation.goToScreen(GameScreen);
         });
