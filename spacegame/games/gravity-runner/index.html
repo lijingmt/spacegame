@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gravity Runner - Pixel Edition</title>
+    <title>Gravity Runner v2.2.2 - Match Drawn Spikes</title>
     <style>
         * {
             margin: 0;
@@ -917,38 +917,78 @@
                 }
             });
 
-            if (score > 0 && score % 100 === 0) {
-                obstacleSpeed = Math.min(7, 4 + score / 500);
-                // Scale spawn interval with speed to keep gaps fair
-                obstacleSpawnInterval = Math.max(70, 100 - (obstacleSpeed - 4) * 15);
+            if (score > 0 && score % 50 === 0) {
+                // Easier difficulty curve:
+                // - Base speed: 4
+                // - Max speed: 9 (was 12)
+                // - Slower growth rate
+                const speedIncrease = Math.min(5, Math.floor(score / 150) * 0.2 + score / 500);
+                obstacleSpeed = Math.min(9, 4 + speedIncrease);
+
+                // Spawn interval - more generous gaps
+                // Min interval: 60 (was 45)
+                const intervalDecrease = (obstacleSpeed - 4) * 8;
+                obstacleSpawnInterval = Math.max(60, 95 - intervalDecrease);
+
+                // Debug log for difficulty changes
+                console.log(`[DIFFICULTY] Score: ${score}, Speed: ${obstacleSpeed.toFixed(1)}, SpawnInterval: ${obstacleSpawnInterval.toFixed(0)}`);
             }
         }
 
         function checkCollision() {
-            const playerLeft = player.x + 8;
-            const playerRight = player.x + PLAYER_SIZE - 8;
-            const playerCenterX = player.x + PLAYER_SIZE / 2;
+            // v2.2.2 - 匹配实际绘制的刺
+            //
+            // 关键发现：drawPixelSpike 使用 Math.floor(width / spikeWidth) 计算刺的数量
+            // 如果 width < spikeWidth (54)，则绘制 0 个刺！
+            // 碰撞检测必须只检测实际绘制了刺的区域
 
-            for (let obs of obstacles) {
-                // Check horizontal overlap - player must be horizontally aligned with spike
-                if (playerCenterX > obs.x && playerCenterX < obs.x + obs.width) {
-                    // Check if player is on the same surface as the spike
-                    const playerOnFloorNow = player.onFloor && !player.flipping;
-                    const playerOnCeilingNow = !player.onFloor && !player.flipping;
-                    const playerFlippingToFloor = player.flipping && !player.onFloor && player.flipProgress >= 0.5;
-                    const playerFlippingToCeiling = player.flipping && player.onFloor && player.flipProgress >= 0.5;
+            const spikeWidth = spikeUpSprite[0].length * PIXEL; // 54
 
-                    const effectivelyOnFloor = playerOnFloorNow || playerFlippingToFloor;
-                    const effectivelyOnCeiling = playerOnCeilingNow || playerFlippingToCeiling;
+            // 玩家碰撞盒
+            const HITBOX_MARGIN = 12;
+            const hitboxLeft = player.x + HITBOX_MARGIN;
+            const hitboxRight = player.x + PLAYER_SIZE - HITBOX_MARGIN;
+            const hitboxCenter = player.x + PLAYER_SIZE / 2;
 
-                    if (obs.onFloor && effectivelyOnFloor) {
-                        return true; // Spike on floor, player on floor = DEAD
-                    }
-                    if (!obs.onFloor && effectivelyOnCeiling) {
-                        return true; // Spike on ceiling, player on ceiling = DEAD
+            // 翻转中间阶段安全
+            if (player.flipping && player.flipProgress > 0.2 && player.flipProgress < 0.8) {
+                return false;
+            }
+
+            for (let i = 0; i < obstacles.length; i++) {
+                const obs = obstacles[i];
+
+                // 不同表面 - 安全
+                if (obs.onFloor !== player.onFloor) {
+                    continue;
+                }
+
+                // 翻转开始阶段仍然安全
+                if (player.flipping && player.flipProgress < 0.8) {
+                    continue;
+                }
+
+                // 计算实际绘制的刺数量（与 drawPixelSpike 完全一致）
+                const numSpikes = Math.floor(obs.width / spikeWidth);
+
+                // 如果没有刺，跳过
+                if (numSpikes <= 0) {
+                    continue;
+                }
+
+                // 检查每个实际绘制的刺
+                for (let s = 0; s < numSpikes; s++) {
+                    const spikeLeft = obs.x + s * spikeWidth;
+                    const spikeRight = spikeLeft + spikeWidth;
+
+                    // 检查玩家碰撞盒是否与这个刺重叠
+                    if (hitboxCenter > spikeLeft && hitboxCenter < spikeRight) {
+                        console.log(`[COLLISION v2.2.2] Hit spike! center=${hitboxCenter.toFixed(0)}, spike=${spikeLeft.toFixed(0)}-${spikeRight.toFixed(0)}, numSpikes=${numSpikes}, obsWidth=${obs.width.toFixed(1)}, score=${score}`);
+                        return true;
                     }
                 }
             }
+
             return false;
         }
 
