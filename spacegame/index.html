@@ -324,6 +324,209 @@
             font-size: 14px;
         }
 
+        /* Stats icon in bottom right */
+        .stats-icon {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            color: rgba(0, 255, 170, 0.3);
+            font-size: 14px;
+            text-decoration: none;
+            z-index: 9999;
+            padding: 5px;
+            transition: opacity 0.3s;
+        }
+
+        .stats-icon:hover {
+            opacity: 0.6;
+        }
+
+        /* Stats full page - camera style */
+        .stats-page {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #0a0a1a 0%, #1a0a2e 50%, #0a0a2a 100%);
+            z-index: 10000;
+            overflow-y: auto;
+            color: #fff;
+        }
+
+        .stats-page.active {
+            display: block;
+        }
+
+        .stats-content-full {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .stats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .stats-header h2 {
+            color: #00ffaa;
+            font-size: 28px;
+            margin: 0;
+        }
+
+        .stats-close {
+            background: rgba(0, 255, 170, 0.2);
+            border: 1px solid #00ffaa;
+            border-radius: 8px;
+            color: #00ffaa;
+            font-size: 14px;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .stats-close:hover {
+            background: rgba(0, 255, 170, 0.3);
+        }
+
+        .stats-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            padding: 1.5rem;
+            background: rgba(0, 255, 170, 0.05);
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid #00ffaa33;
+        }
+
+        .stats-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #00ffaa;
+        }
+
+        .stats-label {
+            color: #888;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .stats-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stats-chart {
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+        }
+
+        .stats-chart h4 {
+            color: #00ffaa;
+            margin-bottom: 1rem;
+            font-size: 16px;
+        }
+
+        .stats-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .stats-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .stats-list::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 4px;
+        }
+
+        .stats-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 255, 170, 0.3);
+            border-radius: 4px;
+        }
+
+        .stats-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 14px;
+        }
+
+        .stats-list-item:last-child {
+            border-bottom: none;
+        }
+
+        .stats-name {
+            flex: 1;
+            color: #ddd;
+        }
+
+        .stats-bar-wrapper {
+            width: 100px;
+            margin: 0 15px;
+        }
+
+        .stats-bar-bg {
+            background: rgba(0, 255, 170, 0.1);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .stats-bar-fill {
+            background: #00ffaa;
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        .stats-count {
+            color: #00ffaa;
+            font-weight: bold;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .stats-login {
+            text-align: center;
+            padding: 100px 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .stats-login input {
+            padding: 10px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: #fff;
+            margin-right: 10px;
+        }
+
+        .stats-login button {
+            padding: 10px 20px;
+            background: #00ffff;
+            border: none;
+            border-radius: 8px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
         /* Responsive */
         @media (max-width: 768px) {
             h1 {
@@ -391,6 +594,81 @@
             <p data-zh="每一款游戏都是独立的技术栈展示" data-en="Each game showcases different technologies">Each game showcases different technologies</p>
             <p style="margin-top: 10px; color: #444;">infinitespacegame.org</p>
         </footer>
+
+        <!-- Stats icon -->
+        <a href="#" class="stats-icon" onclick="showStatsModal(event); return false;">📊</a>
+
+        <!-- Stats full page -->
+        <div class="stats-page" id="statsModal">
+            <div class="stats-content-full">
+                <div class="stats-header">
+                    <h2>📊 Visitor Statistics</h2>
+                    <button class="stats-close" onclick="closeStatsModal()">Close</button>
+                </div>
+
+                <div id="statsLogin" class="stats-login">
+                    <h3 style="margin-bottom: 20px; color: #00ffaa;">🔒 Statistics Access</h3>
+                    <input type="password" id="statsPassword" placeholder="Enter password" style="padding: 12px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; margin-right: 10px; width: 200px;">
+                    <button onclick="statsLogin()" style="padding: 12px 24px; background: #00ffaa; border: none; border-radius: 8px; color: #000; font-weight: bold; cursor: pointer;">Login</button>
+                </div>
+
+                <div id="statsContent" style="display: none;">
+                    <!-- Overview Cards -->
+                    <div class="stats-overview">
+                        <div class="stats-card">
+                            <div class="stats-value" id="statPv">0</div>
+                            <div class="stats-label">Total Visits (PV)</div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-value" id="statUv">0</div>
+                            <div class="stats-label">Unique Visitors (UV)</div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-value" id="statToday">0</div>
+                            <div class="stats-label">Today</div>
+                        </div>
+                        <div class="stats-card">
+                            <div class="stats-value" id="statPages">0</div>
+                            <div class="stats-label">Pages</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="stats-charts">
+                        <div class="stats-chart">
+                            <h4>🎮 Game Visits</h4>
+                            <div class="stats-list" id="gameVisitsList"></div>
+                        </div>
+                        <div class="stats-chart">
+                            <h4>📄 Page Views</h4>
+                            <div class="stats-list" id="pageViewsList"></div>
+                        </div>
+                    </div>
+
+                    <div class="stats-charts">
+                        <div class="stats-chart">
+                            <h4>🌐 Browsers</h4>
+                            <div class="stats-list" id="browserList"></div>
+                        </div>
+                        <div class="stats-chart">
+                            <h4>💻 Operating Systems</h4>
+                            <div class="stats-list" id="osList"></div>
+                        </div>
+                    </div>
+
+                    <div class="stats-charts">
+                        <div class="stats-chart">
+                            <h4>📱 Devices</h4>
+                            <div class="stats-list" id="deviceList"></div>
+                        </div>
+                        <div class="stats-chart">
+                            <h4>🕐 Hourly Distribution</h4>
+                            <div class="stats-list" id="hourlyList"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -574,6 +852,107 @@
         document.addEventListener('keydown', (e) => {
             if (e.key === 'l' || e.key === 'L') {
                 toggleLanguage();
+            }
+        });
+
+        // ============ STATS FUNCTIONS ============
+        let statsPassword = '';
+
+        function showStatsModal(e) {
+            e.preventDefault();
+            document.getElementById('statsModal').classList.add('active');
+        }
+
+        function closeStatsModal() {
+            document.getElementById('statsModal').classList.remove('active');
+        }
+
+        async function statsLogin() {
+            const password = document.getElementById('statsPassword').value;
+            statsPassword = password;
+
+            try {
+                const response = await fetch('/api/admin/stats?password=' + encodeURIComponent(statsPassword));
+                if (response.status === 401) {
+                    alert('Incorrect password');
+                    return;
+                }
+
+                const data = await response.json();
+
+                document.getElementById('statsLogin').style.display = 'none';
+                document.getElementById('statsContent').style.display = 'block';
+
+                // Update stats
+                document.getElementById('statPv').textContent = data.total_visits.toLocaleString();
+                document.getElementById('statUv').textContent = data.unique_visitors.toLocaleString();
+                document.getElementById('statToday').textContent = data.today_visits.toLocaleString();
+                document.getElementById('statPages').textContent = Object.keys(data.page_views || {}).length;
+
+                // Game visits (extract from page_views)
+                const gameVisits = {};
+                const pageViews = data.page_views || {};
+                for (const [page, count] of Object.entries(pageViews)) {
+                    if (page.includes('gravity-runner')) {
+                        gameVisits['Gravity Runner 🚀'] = (gameVisits['Gravity Runner 🚀'] || 0) + count;
+                    } else if (page.includes('bubble-trouble')) {
+                        gameVisits['Bubble Trouble 🫧'] = (gameVisits['Bubble Trouble 🫧'] || 0) + count;
+                    } else if (page === '/') {
+                        gameVisits['Homepage 🏠'] = (gameVisits['Homepage 🏠'] || 0) + count;
+                    }
+                }
+                renderStatsList('gameVisitsList', gameVisits);
+
+                // Page views
+                renderStatsList('pageViewsList', pageViews);
+
+                // Browsers
+                renderStatsList('browserList', data.browser_stats || {});
+
+                // OS
+                renderStatsList('osList', data.os_stats || {});
+
+                // Devices
+                renderStatsList('deviceList', data.device_stats || {});
+
+                // Hourly
+                renderStatsList('hourlyList', data.hourly_stats || {});
+
+            } catch (error) {
+                console.error('Stats error:', error);
+                alert('Failed to load statistics');
+            }
+        }
+
+        function renderStatsList(containerId, data) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+
+            const sorted = Object.entries(data).sort((a, b) => b[1] - a[1]);
+            const maxCount = sorted.length > 0 ? sorted[0][1] : 1;
+
+            container.innerHTML = sorted.map(([key, count]) => {
+                const percentage = Math.round((count / maxCount) * 100);
+                // Format key for hourly stats
+                const displayKey = containerId === 'hourlyList' ? `${key}:00` : key;
+                return `
+                    <div class="stats-list-item">
+                        <span class="stats-name">${displayKey}</span>
+                        <div class="stats-bar-wrapper">
+                            <div class="stats-bar-bg">
+                                <div class="stats-bar-fill" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                        <span class="stats-count">${count.toLocaleString()}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Allow Enter key to submit password
+        document.getElementById('statsPassword')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                statsLogin();
             }
         });
     </script>

@@ -13,7 +13,19 @@
         overflow: hidden;
       }
     </style>
-    <script type="module" crossorigin src="./assets/index-BnrsEJzy.js"></script>
+    <script type="module" crossorigin src="./assets/index-CCA4W0x_.js"></script>
+    <!-- Visit tracking -->
+    <script>
+      (function() {
+        try {
+          fetch('/api/stats/visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ page: '/games/bubble-trouble/' })
+          }).catch(() => {});
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body>
   </body>

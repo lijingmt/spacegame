@@ -4,6 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gravity Runner v2.2.2 - Match Drawn Spikes</title>
+    <!-- Visit tracking -->
+    <script>
+      (function() {
+        try {
+          fetch('/api/stats/visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ page: '/games/gravity-runner/' })
+          }).catch(() => {});
+        } catch(e) {}
+      })();
+    </script>
     <style>
         * {
             margin: 0;
