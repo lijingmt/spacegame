@@ -62,6 +62,63 @@
             font-family: Arial, sans-serif;
         }
 
+        #oxygenContainer {
+            position: absolute;
+            top: 55px;
+            left: 20px;
+            z-index: 10;
+            font-family: Arial, sans-serif;
+        }
+
+        #oxygenLabel {
+            color: #fff;
+            font-size: 14px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            margin-bottom: 3px;
+        }
+
+        #oxygenBar {
+            width: 200px;
+            height: 16px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #444;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        #oxygenFill {
+            height: 100%;
+            background: linear-gradient(to right, #00ff88, #00ffcc);
+            transition: width 0.3s ease, background 0.3s ease;
+            border-radius: 6px;
+        }
+
+        #oxygenFill.low {
+            background: linear-gradient(to right, #ffaa00, #ff6600);
+        }
+
+        #oxygenFill.critical {
+            background: linear-gradient(to right, #ff3333, #cc0000);
+            animation: pulse-oxygen 0.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse-oxygen {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        #oxygenPercent {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #fff;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            line-height: 16px;
+        }
+
         #langBtn {
             position: absolute;
             top: 20px;
@@ -415,6 +472,13 @@
         <a href="/" id="homeBtn" data-zh="🏠 首页" data-en="🏠 HOME">🏠 HOME</a>
         <button id="langBtn" onclick="toggleLanguage()">中文</button>
         <div id="score">SCORE: 0</div>
+        <div id="oxygenContainer">
+            <div id="oxygenLabel" data-zh="💨 氧气" data-en="💨 OXYGEN">💨 OXYGEN</div>
+            <div id="oxygenBar">
+                <div id="oxygenFill"></div>
+                <div id="oxygenPercent">100%</div>
+            </div>
+        </div>
         <div id="countdown" class="hidden"></div>
 
         <div id="startScreen">
@@ -424,6 +488,8 @@
                 <p data-zh="▶ Player runs on the FLOOR" data-en="▶ Player runs on the FLOOR">▶ Player runs on the FLOOR</p>
                 <p data-zh="▶ CLICK to flip to CEILING" data-en="▶ CLICK to flip to CEILING">▶ CLICK to flip to CEILING</p>
                 <p data-zh="▶ Avoid SPIKES on your surface!" data-en="▶ Avoid SPIKES on your surface!">▶ Avoid SPIKES on your surface!</p>
+                <p data-zh="▶ COLLECT OXYGEN bottles to survive!" data-en="▶ COLLECT OXYGEN bottles to survive!">▶ COLLECT OXYGEN bottles to survive!</p>
+                <p data-zh="▶ OXYGEN depletes over time!" data-en="▶ OXYGEN depletes over time!">▶ OXYGEN depletes over time!</p>
                 <p data-zh="▶ CLICK again to return!" data-en="▶ CLICK again to return!">▶ CLICK again to return!</p>
             </div>
 
@@ -706,6 +772,25 @@
             finalScoreElement.textContent = `${texts[currentLang].finalScore}: ${score}`;
         }
 
+        function updateOxygenDisplay() {
+            const oxygenFill = document.getElementById('oxygenFill');
+            const oxygenPercent = document.getElementById('oxygenPercent');
+            const oxygenPercentValue = Math.max(0, Math.floor(oxygen));
+
+            oxygenFill.style.width = `${oxygenPercentValue}%`;
+            oxygenPercent.textContent = `${oxygenPercentValue}%`;
+
+            // 移除所有状态类
+            oxygenFill.classList.remove('low', 'critical');
+
+            // 根据氧气水平添加状态
+            if (oxygenPercentValue <= 20) {
+                oxygenFill.classList.add('critical');
+            } else if (oxygenPercentValue <= 40) {
+                oxygenFill.classList.add('low');
+            }
+        }
+
         async function startCountdown() {
             countdownElement.classList.remove('hidden');
             startScreen.classList.add('hidden');
@@ -742,6 +827,15 @@
         let obstacleSpeed = 4;
         let obstacleSpawnTimer = 0;
         let obstacleSpawnInterval = 100;
+
+        // ============ OXYGEN SYSTEM ============
+        let oxygen = 100; // 氧气百分比 (0-100)
+        let maxOxygen = 100;
+        const OXYGEN_DEPLETION_RATE = 0.05; // 每帧消耗氧气
+        const OXYGEN_BOTTLE_AMOUNT = 20; // 每个氧气瓶补充量
+        let oxygenBottles = []; // 氧气瓶数组
+        let oxygenSpawnTimer = 0;
+        const OXYGEN_SPAWN_INTERVAL = 300; // 氧气瓶生成间隔（帧数）
 
         // Background stars (now pixel stars!)
         let stars = [];
@@ -1020,6 +1114,31 @@
             [0,0,0,0,0,0,0,1,1,1,0,0,0,0,0]
         ];
 
+        // Oxygen bottle sprite - 氧气瓶像素图 (16x20像素)
+        // 0 = transparent, 1 = dark outline, 2 = bottle body (cyan), 3 = highlight, 4 = cap (yellow), 5 = bubbles
+        const oxygenBottleSprite = [
+            [0,0,0,0,0,0,0,1,1,1,1,1,1,0,0,0],
+            [0,0,0,0,0,0,1,4,4,4,4,4,4,1,0,0,0],
+            [0,0,0,0,0,1,4,4,4,4,4,4,4,1,0,0,0],
+            [0,0,0,0,1,4,4,4,4,4,4,4,4,1,0,0,0],
+            [0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,0,0],
+            [0,0,0,1,2,2,2,2,2,2,2,2,2,1,0,0,0],
+            [0,0,1,2,2,3,2,2,2,2,2,3,2,2,1,0,0],
+            [0,0,1,2,2,2,2,2,2,2,2,2,2,2,1,0,0],
+            [0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
+            [0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
+            [0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
+            [0,1,2,2,2,2,2,2,5,5,2,2,2,2,2,1,0],
+            [0,1,2,2,2,2,5,5,5,5,5,2,2,2,2,1,0],
+            [0,1,2,2,2,5,5,5,5,5,5,5,2,2,2,1,0],
+            [0,1,2,2,2,5,5,5,5,5,5,5,2,2,2,1,0],
+            [0,1,2,2,2,2,5,5,5,5,5,2,2,2,2,1,0],
+            [0,1,2,2,2,2,2,2,2,2,2,2,2,2,2,1,0],
+            [0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0],
+            [0,0,0,1,1,1,1,1,1,1,1,1,1,1,0,0,0],
+            [0,0,0,0,0,0,1,1,1,1,1,1,0,0,0,0,0]
+        ];
+
         function drawPixelSpike(x, y, width, pointingUp) {
             const spikeWidth = spikeUpSprite[0].length * PIXEL;
             const numSpikes = Math.floor(width / spikeWidth);
@@ -1057,6 +1176,39 @@
                     drawPixelSpike(obs.x, GROUND_Y + PLAYER_SIZE, obs.width, true);
                 } else {
                     drawPixelSpike(obs.x, CEILING_Y, obs.width, false);
+                }
+            });
+        }
+
+        function drawOxygenBottles() {
+            oxygenBottles.forEach(bottle => {
+                const bottleWidth = oxygenBottleSprite[0].length * PIXEL;
+                const bottleHeight = oxygenBottleSprite.length * PIXEL;
+                const baseX = bottle.x;
+                const baseY = bottle.onFloor ?
+                    GROUND_Y + PLAYER_SIZE - bottleHeight :
+                    CEILING_Y;
+
+                // 绘制氧气瓶
+                for (let row = 0; row < oxygenBottleSprite.length; row++) {
+                    for (let col = 0; col < oxygenBottleSprite[row].length; col++) {
+                        const pixel = oxygenBottleSprite[row][col];
+                        if (pixel !== 0) {
+                            let color = '#00ccff'; // 2 = 青色瓶身
+                            if (pixel === 1) color = '#006688'; // 深色轮廓
+                            else if (pixel === 3) color = '#66e5ff'; // 高光
+                            else if (pixel === 4) color = '#ffcc00'; // 黄色瓶盖
+                            else if (pixel === 5) color = '#ffffff'; // 气泡
+
+                            ctx.fillStyle = color;
+                            ctx.fillRect(
+                                baseX + col * PIXEL,
+                                baseY + row * PIXEL,
+                                PIXEL,
+                                PIXEL
+                            );
+                        }
+                    }
                 }
             });
         }
@@ -1099,6 +1251,37 @@
             });
         }
 
+        function spawnOxygenBottle() {
+            // 找到障碍物之间的空隙
+            const minGap = 200; // 最小空隙距离
+            const onFloor = Math.random() < 0.5;
+
+            // 检查最近障碍物的位置，确保氧气瓶生成在安全空隙中
+            let safeX = canvas.width + Math.random() * 150;
+
+            // 查找同一表面上最近的障碍物
+            for (const obs of obstacles) {
+                if (obs.onFloor === onFloor) {
+                    const dist = obs.x - safeX;
+                    // 如果太靠近障碍物，调整位置
+                    if (Math.abs(dist) < minGap) {
+                        if (obs.x > canvas.width / 2) {
+                            safeX = obs.x + minGap + Math.random() * 50;
+                        } else {
+                            safeX = canvas.width + Math.random() * 100;
+                        }
+                    }
+                }
+            }
+
+            oxygenBottles.push({
+                x: safeX,
+                onFloor: onFloor,
+                collected: false,
+                bobOffset: Math.random() * Math.PI * 2 // 用于上下浮动动画
+            });
+        }
+
         function updateObstacles() {
             obstacleSpawnTimer++;
             if (obstacleSpawnTimer >= obstacleSpawnInterval) {
@@ -1130,6 +1313,66 @@
                 // Debug log for difficulty changes
                 console.log(`[DIFFICULTY ${selectedDifficulty.toUpperCase()}] Score: ${score}, Speed: ${obstacleSpeed.toFixed(1)}, SpawnInterval: ${obstacleSpawnInterval.toFixed(0)}`);
             }
+        }
+
+        function updateOxygenBottles() {
+            oxygenSpawnTimer++;
+            if (oxygenSpawnTimer >= OXYGEN_SPAWN_INTERVAL) {
+                spawnOxygenBottle();
+                oxygenSpawnTimer = 0;
+            }
+
+            oxygenBottles.forEach((bottle, index) => {
+                bottle.x -= obstacleSpeed;
+
+                // 移除屏幕外的氧气瓶
+                if (bottle.x < -60) {
+                    oxygenBottles.splice(index, 1);
+                }
+
+                // 检查收集
+                if (!bottle.collected && checkOxygenCollection(bottle)) {
+                    bottle.collected = true;
+                    oxygen = Math.min(maxOxygen, oxygen + OXYGEN_BOTTLE_AMOUNT);
+                    updateOxygenDisplay();
+                    oxygenBottles.splice(index, 1);
+                    console.log(`[OXYGEN] Collected! Oxygen: ${oxygen.toFixed(0)}%`);
+                }
+            });
+        }
+
+        function checkOxygenCollection(bottle) {
+            const bottleWidth = oxygenBottleSprite[0].length * PIXEL;
+            const bottleHeight = oxygenBottleSprite.length * PIXEL;
+
+            const bottleY = bottle.onFloor ?
+                GROUND_Y + PLAYER_SIZE - bottleHeight :
+                CEILING_Y;
+
+            // 玩家碰撞盒
+            const playerLeft = player.x + 10;
+            const playerRight = player.x + PLAYER_SIZE - 10;
+            const playerCenter = player.x + PLAYER_SIZE / 2;
+
+            const bottleLeft = bottle.x;
+            const bottleRight = bottle.x + bottleWidth;
+            const bottleCenter = bottle.x + bottleWidth / 2;
+
+            // 检查X轴重叠
+            if (playerCenter > bottleLeft && playerCenter < bottleRight) {
+                // 检查Y轴（同一表面才能收集）
+                if (bottle.onFloor === player.onFloor) {
+                    // 检查Y轴范围
+                    const playerTop = player.onFloor ? player.y : player.y + PLAYER_SIZE - bottleHeight;
+                    const playerBottom = player.onFloor ? player.y + PLAYER_SIZE : player.y + bottleHeight;
+
+                    if (playerBottom > bottleY && playerTop < bottleY + bottleHeight) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         function checkCollision() {
@@ -1200,8 +1443,20 @@
             updateStars();
             drawObstacles();
             updateObstacles();
+            drawOxygenBottles();
+            updateOxygenBottles();
             updatePlayer();
             drawPlayer();
+
+            // 氧气消耗
+            oxygen -= OXYGEN_DEPLETION_RATE;
+            if (oxygen <= 0) {
+                oxygen = 0;
+                updateOxygenDisplay();
+                gameOverByOxygen();
+                return;
+            }
+            updateOxygenDisplay();
 
             if (checkCollision()) {
                 gameOver();
@@ -1250,11 +1505,15 @@
             player.runFrame = 0;
 
             obstacles = [];
+            oxygenBottles = [];
+            oxygen = maxOxygen;
             score = 0;
             obstacleSpeed = config.baseSpeed;
             obstacleSpawnTimer = 0;
             obstacleSpawnInterval = config.baseSpawnInterval;
+            oxygenSpawnTimer = 0;
             updateScoreDisplay();
+            updateOxygenDisplay();
 
             console.log(`[GAME START] Difficulty: ${selectedDifficulty.toUpperCase()}, Speed: ${obstacleSpeed}, SpawnInterval: ${obstacleSpawnInterval}`);
 
@@ -1283,6 +1542,31 @@
             gameOverScreen.classList.remove('hidden');
         }
 
+        async function gameOverByOxygen() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+
+            const currentHighScore = await getPlayerHighScore(currentPlayerName);
+            isNewHighScore = score > currentHighScore;
+
+            await updateLeaderboard(currentPlayerName, score);
+            cachedHighScores[currentPlayerName] = score;
+
+            finalScoreElement.textContent = `${texts[currentLang].finalScore}: ${score}`;
+
+            if (isNewHighScore && score > 0) {
+                highScoreMessage.innerHTML = `<span class="highscore-badge">${texts[currentLang].newRecord}</span>`;
+            } else {
+                highScoreMessage.innerHTML = `<span style="color: #666;">${texts[currentLang].yourBest}${currentHighScore}</span>`;
+            }
+
+            // 显示氧气耗尽消息
+            const oxygenMsg = currentLang === 'zh' ? '💨 氧气耗尽!' : '💨 OUT OF OXYGEN!';
+            highScoreMessage.innerHTML += `<br><span style="color: #00ccff; font-size: 14px;">${oxygenMsg}</span>`;
+
+            gameOverScreen.classList.remove('hidden');
+        }
+
         async function restartGame() {
             gameOverScreen.classList.add('hidden');
             const config = DIFFICULTY_CONFIG[selectedDifficulty];
@@ -1297,11 +1581,15 @@
             player.runFrame = 0;
 
             obstacles = [];
+            oxygenBottles = [];
+            oxygen = maxOxygen;
             score = 0;
             obstacleSpeed = config.baseSpeed;
             obstacleSpawnTimer = 0;
             obstacleSpawnInterval = config.baseSpawnInterval;
+            oxygenSpawnTimer = 0;
             updateScoreDisplay();
+            updateOxygenDisplay();
 
             console.log(`[GAME RESTART] Difficulty: ${selectedDifficulty.toUpperCase()}, Speed: ${obstacleSpeed}, SpawnInterval: ${obstacleSpawnInterval}`);
 
